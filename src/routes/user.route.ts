@@ -1,4 +1,5 @@
 import express from 'express'
+import { USER_ROLE } from '~/constants/user'
 import {
   createUserControler,
   deleteUserControler,
@@ -6,13 +7,14 @@ import {
   getOneUserControler,
   updateUserControler
 } from '~/controllers/user.controler'
+import { authMiddleware, roleMiddleware } from '~/middlewares/auth'
 
 const router = express.Router()
 
-router.get('/', getAllUserControler)
-router.post('/', createUserControler)
-router.get('/:id', getOneUserControler)
-router.patch('/:id', updateUserControler)
-router.delete('/:id', deleteUserControler)
+router.get('/', authMiddleware, getAllUserControler)
+router.get('/:id', authMiddleware, getOneUserControler)
+router.post('/', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), createUserControler)
+router.patch('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), updateUserControler)
+router.delete('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), deleteUserControler)
 
 export default router

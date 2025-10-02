@@ -5,9 +5,9 @@ import { IUser } from '~/interfaces/user.interface'
 export const UserSchema = new mongoose.Schema(
   {
     username: { type: String, required: true },
-    email: { type: String },
-    password: { type: String },
-    phone: { type: String },
+    email: { type: String, required: true },
+    password: { type: String, required: true },
+    phone: { type: String, required: true },
     role: {
       type: Number,
       enum: USER_ROLE, // chỉ cho phép giá trị trong enum
