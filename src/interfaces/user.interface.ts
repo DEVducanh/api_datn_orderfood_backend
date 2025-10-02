@@ -1,6 +1,6 @@
 import { USER_ROLE } from '~/constants/user'
 
-export interface IUser extends Document {
+export interface IUser {
   username: string
   email: string
   phone: string

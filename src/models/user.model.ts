@@ -7,7 +7,7 @@ export const UserSchema = new mongoose.Schema(
     username: { type: String, required: true },
     email: { type: String },
     password: { type: String },
-    phone: { type: Number },
+    phone: { type: String },
     role: {
       type: Number,
       enum: USER_ROLE, // chỉ cho phép giá trị trong enum
