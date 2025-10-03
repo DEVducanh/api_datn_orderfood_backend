@@ -1,0 +1,70 @@
+import { ICategory } from '~/interfaces/category.interface'
+import Category from '../models/category.model'
+
+export const getAllCategoryService = async (search?: string, status?: string, page: number = 1) => {
+  try {
+    const query: any = {}
+
+    // tìm kiếm theo tên
+    if (search) {
+      query.category_name = { $regex: search, $options: 'i' }
+    }
+
+    // lọc theo status
+    if (status) {
+      query.status = status
+    }
+
+    const limit = 6 // cố định 6 item mỗi trang
+    const skip = (page - 1) * limit
+
+    const [data, total] = await Promise.all([
+      Category.find(query).skip(skip).limit(limit),
+      Category.countDocuments(query)
+    ])
+    return {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      data
+    }
+  } catch (error) {
+    throw new Error('Cannot get Category')
+  }
+}
+
+export const getOneCategoryService = async (id: string) => {
+  try {
+    const category = await Category.findById(id)
+    return category
+  } catch (error) {
+    throw new Error(`Cannot get Category by id : ${id}`)
+  }
+}
+
+export const createCategoryService = async (data: ICategory): Promise<ICategory> => {
+  try {
+    const newUser = await new Category(data).save()
+    return newUser
+  } catch (error) {
+    throw new Error('Cannot create Category')
+  }
+}
+
+export const updateCategoryService = async (id: string, data: ICategory) => {
+  try {
+    const newUser = await Category.findByIdAndUpdate(id, data)
+    return newUser
+  } catch (error) {
+    throw new Error('Cannot Update Category')
+  }
+}
+
+export const deleteCategoryService = async (id: string) => {
+  try {
+    await Category.findByIdAndDelete(id)
+  } catch (error) {
+    throw new Error('Cannot Delete')
+  }
+}

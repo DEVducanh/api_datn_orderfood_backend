@@ -1,4 +1,4 @@
-import { USER_ROLE } from '~/constants/user'
+import { USER_ROLE } from '~/constants/enum'
 
 export interface IUser {
   username: string

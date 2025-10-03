@@ -3,6 +3,8 @@ import dotenv from 'dotenv'
 import connectDB from './config/db'
 import userRouter from './routes/user.route'
 import authRouter from './routes/auth.route'
+import cateRouter from './routes/cate.route'
+import dishesRouter from './routes/dish.route'
 
 dotenv.config()
 const app = express()
@@ -14,5 +16,7 @@ app.use(express.json())
 // ...Router
 app.use('/auth', authRouter)
 app.use('/users', userRouter)
+app.use('/category', cateRouter)
+app.use('/dishes', dishesRouter)
 
 app.listen(PORT, () => console.log(`Server running at http://${HOST}:${PORT}`))

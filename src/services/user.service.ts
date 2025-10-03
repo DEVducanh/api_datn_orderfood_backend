@@ -41,6 +41,6 @@ export const deleteUserService = async (id: string) => {
   try {
     await User.findByIdAndDelete(id)
   } catch (error) {
-    throw new Error('Cannot Update User')
+    throw new Error('Cannot Delete')
   }
 }
