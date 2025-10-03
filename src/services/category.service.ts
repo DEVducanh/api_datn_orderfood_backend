@@ -52,7 +52,7 @@ export const createCategoryService = async (data: ICategory): Promise<ICategory>
   }
 }
 
-export const UpdateCategoryService = async (id: string, data: ICategory) => {
+export const updateCategoryService = async (id: string, data: ICategory) => {
   try {
     const newUser = await Category.findByIdAndUpdate(id, data)
     return newUser

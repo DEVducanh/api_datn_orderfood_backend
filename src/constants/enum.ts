@@ -7,6 +7,11 @@ export enum USER_ROLE {
 }
 
 export enum CATEGORY_STATUS {
-  INACTIVE = 0,
-  ACTIVE = 1
+  INACTIVE = 0, //Dừng HĐ
+  ACTIVE = 1 //Hoạt động
+}
+
+export enum DISHES_STATUS {
+  AVAILABLE = 'available', // Còn bán
+  UNAVAILABLE = 'unavailable' // Ngừng bán
 }

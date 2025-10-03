@@ -5,7 +5,7 @@ import {
   deleteCategoryService,
   getAllCategoryService,
   getOneCategoryService,
-  UpdateCategoryService
+  updateCategoryService
 } from '~/services/category.service'
 
 export const getAllCategoryControler = async (req: Request, res: Response) => {
@@ -41,7 +41,7 @@ export const createCategoryControler = async (req: Request, res: Response) => {
 export const updateCategoryControler = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
-    const data = await UpdateCategoryService(id, req.body)
+    const data = await updateCategoryService(id, req.body)
     res.status(201).json({ message: DEFAULT_MESSAGE.DEFAULT_SUCCESS, data })
   } catch (error) {
     return res.status(500).json({ message: DEFAULT_MESSAGE.DEFAULT_ERROR })
