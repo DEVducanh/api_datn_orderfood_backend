@@ -5,3 +5,8 @@ export enum USER_ROLE {
   CHEF = 3,
   ADMIN = 4
 }
+
+export enum CATEGORY_STATUS {
+  INACTIVE = 0,
+  ACTIVE = 1
+}

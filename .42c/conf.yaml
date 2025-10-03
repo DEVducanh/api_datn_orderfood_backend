@@ -1,0 +1,3 @@
+apis:
+  test-swagger.yaml:
+    alias: swagger-ui-demo

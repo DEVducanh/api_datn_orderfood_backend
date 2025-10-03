@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { USER_ROLE } from '~/constants/user'
+import { USER_ROLE } from '~/constants/enum'
 import { IUser } from '~/interfaces/user.interface'
 
 export const UserSchema = new mongoose.Schema(

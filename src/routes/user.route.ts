@@ -1,5 +1,5 @@
 import express from 'express'
-import { USER_ROLE } from '~/constants/user'
+import { USER_ROLE } from '~/constants/enum'
 import {
   createUserControler,
   deleteUserControler,
