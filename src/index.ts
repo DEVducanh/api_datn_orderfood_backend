@@ -46,7 +46,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiSpecification))
 // ...Router
 app.use('/auth', authRouter)
 app.use('/users', userRouter)
-app.use('/category', cateRouter)
+app.use('/categories', cateRouter)
 app.use('/dishes', dishesRouter)
 
 app.listen(PORT, () => console.log(`Server running at http://${HOST}:${PORT}`))

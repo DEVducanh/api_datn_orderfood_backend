@@ -33,6 +33,7 @@ const router = express.Router()
  *         password:
  *           type: string
  *           example: 123456
+ *           writeOnly: true
  *         phone:
  *           type: string
  *           example: 0987654321

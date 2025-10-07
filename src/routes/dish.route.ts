@@ -57,7 +57,6 @@ const router = express.Router()
  *         required: false
  *         schema:
  *           type: string
- *           example: trà sữa
  *       - name: status
  *         in: query
  *         description: Lọc theo trạng thái (0 - hết hàng, 1 - còn hàng)
@@ -71,14 +70,6 @@ const router = express.Router()
  *         required: false
  *         schema:
  *           type: string
- *           example: 68df56811d6f96e6b2b21297
- *       - name: page
- *         in: query
- *         description: Trang hiện tại (phân trang)
- *         required: false
- *         schema:
- *           type: integer
- *           example: 1
  *     responses:
  *       200:
  *         description: Danh sách món ăn
