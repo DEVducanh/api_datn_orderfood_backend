@@ -45,8 +45,8 @@ export const getOneCategoryService = async (id: string) => {
 
 export const createCategoryService = async (data: ICategory): Promise<ICategory> => {
   try {
-    const newUser = await new Category(data).save()
-    return newUser
+    const newCate = await new Category(data).save()
+    return newCate
   } catch (error) {
     throw new Error('Cannot create Category')
   }
@@ -54,8 +54,8 @@ export const createCategoryService = async (data: ICategory): Promise<ICategory>
 
 export const updateCategoryService = async (id: string, data: ICategory) => {
   try {
-    const newUser = await Category.findByIdAndUpdate(id, data)
-    return newUser
+    const newCate = await Category.findByIdAndUpdate(id, data)
+    return newCate
   } catch (error) {
     throw new Error('Cannot Update Category')
   }

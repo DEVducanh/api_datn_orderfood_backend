@@ -40,10 +40,10 @@ const router = express.Router()
  *           description: 0 - Inactive, 1 - Active
  *           example: 1
  *
- * /categories:
+ * /category:
  *   get:
  *     summary: Lấy danh sách danh mục
- *     tags: [Categories]
+ *     tags: [Category]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -95,7 +95,7 @@ const router = express.Router()
  *             schema:
  *               $ref: '#/components/schemas/Category'
  *
- * /categories/{id}:
+ * /category/{id}:
  *   get:
  *     summary: Lấy thông tin 1 danh mục theo ID
  *     tags: [Categories]
@@ -138,7 +138,7 @@ const router = express.Router()
  *
  *   delete:
  *     summary: Xóa danh mục
- *     tags: [Categories]
+ *     tags: [Category]
  *     security:
  *       - bearerAuth: []
  *     parameters:
