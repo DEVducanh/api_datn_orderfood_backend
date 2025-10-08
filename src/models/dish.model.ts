@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose'
 import { DISHES_STATUS } from '~/constants/enum'
-import { IDishes } from '~/interfaces/dish.interface'
+import { IDishes } from '~/interfaces/dish.type'
 
 export const DishSchema = new mongoose.Schema(
   {

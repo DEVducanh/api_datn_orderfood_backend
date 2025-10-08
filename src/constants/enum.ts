@@ -15,3 +15,10 @@ export enum DISHES_STATUS {
   AVAILABLE = 'available', // Còn bán
   UNAVAILABLE = 'unavailable' // Ngừng bán
 }
+
+export enum TABLE_STATUS {
+  EMTY = 'emty', // Trống
+  RESERVED = 'reserved',
+  OCCUPIED = 'occupied',
+  MAINTENANCE = 'maintenance'
+}

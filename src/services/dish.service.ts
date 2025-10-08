@@ -1,5 +1,6 @@
-import { IDishes } from '~/interfaces/dish.interface'
+import { IDishes } from '~/interfaces/dish.type'
 import Dish from '../models/dish.model'
+import { IUser } from '~/interfaces/user.type'
 
 export const getAllDishService = async (
   search?: string,
@@ -52,11 +53,13 @@ export const getOneDishService = async (id: string) => {
   }
 }
 
-export const createDishService = async (data: IDishes) => {
+export const createDishService = async (data: IDishes): Promise<IDishes> => {
   try {
     const newDish = await new Dish(data).save()
     return newDish
   } catch (error) {
+    console.log(error)
+
     throw new Error('Cannot create Dish')
   }
 }
