@@ -1,4 +1,4 @@
-import { ILogin, IRegister } from '~/interfaces/user.interface'
+import { ILogin, IRegister } from '~/interfaces/user.type'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import User from '../models/user.model'

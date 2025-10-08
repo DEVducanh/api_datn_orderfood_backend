@@ -53,14 +53,12 @@ const router = express.Router()
  *         required: false
  *         schema:
  *           type: string
- *           example: đồ uống
  *       - name: status
  *         in: query
  *         description: Lọc theo trạng thái (0 - không hoạt động, 1 - hoạt động)
  *         required: false
  *         schema:
  *           type: integer
- *           example: 1
  *       - name: page
  *         in: query
  *         description: Trang hiện tại (phân trang)

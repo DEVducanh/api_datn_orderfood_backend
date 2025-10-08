@@ -1,4 +1,4 @@
-import { IDishes } from '~/interfaces/dish.interface'
+import { IDishes } from '~/interfaces/dish.type'
 import Dish from '../models/dish.model'
 
 export const getAllDishService = async (

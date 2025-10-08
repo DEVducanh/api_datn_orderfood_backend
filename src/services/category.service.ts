@@ -1,4 +1,4 @@
-import { ICategory } from '~/interfaces/category.interface'
+import { ICategory } from '~/interfaces/category.type'
 import Category from '../models/category.model'
 
 export const getAllCategoryService = async (search?: string, status?: string, page: number = 1) => {
