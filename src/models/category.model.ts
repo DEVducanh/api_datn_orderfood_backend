@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import { CATEGORY_STATUS } from '~/constants/enum'
-import { ICategory } from '~/interfaces/category.interface'
+import { ICategory } from '~/interfaces/category.type'
 
 export const CategorySchema = new mongoose.Schema(
   {

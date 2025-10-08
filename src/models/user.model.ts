@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import { USER_ROLE } from '~/constants/enum'
-import { IUser } from '~/interfaces/user.interface'
+import { IUser } from '~/interfaces/user.type'
 
 export const UserSchema = new mongoose.Schema(
   {
