@@ -22,3 +22,12 @@ export enum TABLE_STATUS {
   RESERVED = 'reserved', // Bàn đã đặt trước
   MAINTENANCE = 'maintenance' // Bàn đang bảo trì
 }
+
+export enum ORDER_STATUS {
+  PENDING = 'PENDING',
+  IN_PROGRESS = 'IN_PROGRESS',
+  READY = 'READY',
+  SERVED = 'SERVED',
+  CANCELED = 'CANCELED',
+  COMPLETED = 'COMPLETED'
+}

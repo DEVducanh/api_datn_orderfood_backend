@@ -15,7 +15,7 @@ const router = express.Router()
 /**
  * @openapi
  * tags:
- *   - name: Categories
+ *   - name: Category
  *     description: Quản lý danh mục sản phẩm (Category)
  *
  * components:
@@ -78,7 +78,7 @@ const router = express.Router()
  *
  *   post:
  *     summary: Tạo danh mục mới
- *     tags: [Categories]
+ *     tags: [Category]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -98,7 +98,7 @@ const router = express.Router()
  * /category/{id}:
  *   get:
  *     summary: Lấy thông tin 1 danh mục theo ID
- *     tags: [Categories]
+ *     tags: [Category]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -117,7 +117,7 @@ const router = express.Router()
  *
  *   patch:
  *     summary: Cập nhật danh mục
- *     tags: [Categories]
+ *     tags: [Category]
  *     security:
  *       - bearerAuth: []
  *     parameters:

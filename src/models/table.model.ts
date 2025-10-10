@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 import { TABLE_STATUS } from '~/constants/enum'
 import { ITable } from '~/interfaces/table.type'
 
-export const TableSchema = new mongoose.Schema(
+export const TableSchema = new mongoose.Schema<ITable>(
   {
     table_name: { type: String, required: true },
     qr_code: { type: String, required: true },
