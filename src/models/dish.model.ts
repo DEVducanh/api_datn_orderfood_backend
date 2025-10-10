@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose'
 import { DISHES_STATUS } from '~/constants/enum'
 import { IDishes } from '~/interfaces/dish.type'
 
-export const DishSchema = new mongoose.Schema(
+export const DishSchema = new mongoose.Schema<IDishes>(
   {
     dish_name: { type: String, required: true },
     description: { type: String, required: true },

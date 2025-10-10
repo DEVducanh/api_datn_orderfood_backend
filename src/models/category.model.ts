@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 import { CATEGORY_STATUS } from '~/constants/enum'
 import { ICategory } from '~/interfaces/category.type'
 
-export const CategorySchema = new mongoose.Schema(
+export const CategorySchema = new mongoose.Schema<ICategory>(
   {
     category_name: { type: String, required: true },
     description: { type: String, required: true },

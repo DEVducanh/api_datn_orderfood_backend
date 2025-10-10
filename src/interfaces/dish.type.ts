@@ -6,5 +6,5 @@ export interface IDishes {
   price: number
   imageUrl: string
   status: DISHES_STATUS
-  category_id: string
+  category_id?: string
 }
