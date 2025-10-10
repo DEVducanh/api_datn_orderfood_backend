@@ -10,6 +10,7 @@ import tableRouter from './routes/table.route'
 
 import swaggerUi from 'swagger-ui-express'
 import swaggerJSDoc from 'swagger-jsdoc'
+import cors from 'cors'
 
 const options: swaggerJSDoc.Options = {
   definition: {
@@ -29,7 +30,7 @@ const options: swaggerJSDoc.Options = {
     },
     security: [
       {
-        bearerAuth: [] // 👈 đặt ở đây
+        bearerAuth: []
       }
     ]
   },
@@ -43,6 +44,14 @@ const app = express()
 const PORT = process.env.PORT || 5000
 const HOST = process.env.HOST || 'localhost'
 connectDB()
+
+app.use(
+  cors({
+    origin: '*',
+    methods: 'GET,POST,PATCH,DELETE',
+    allowedHeaders: 'Content-Type,Authorization'
+  })
+)
 app.use(express.json())
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiSpecification))
 
