@@ -22,3 +22,12 @@ export enum TABLE_STATUS {
   OCCUPIED = 'occupied',
   MAINTENANCE = 'maintenance'
 }
+
+export enum ORDER_STATUS {
+  PENDING = 'PENDING',
+  IN_PROGRESS = 'IN_PROGRESS',
+  READY = 'READY',
+  SERVED = 'SERVED',
+  CANCELED = 'CANCELED',
+  COMPLETED = 'COMPLETED'
+}
