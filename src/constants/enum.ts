@@ -22,10 +22,3 @@ export enum TABLE_STATUS {
   RESERVED = 'reserved', // Bàn đã đặt trước
   MAINTENANCE = 'maintenance' // Bàn đang bảo trì
 }
-
-export enum TABLE_STATUS {
-  EMTY = 'emty', // Trống
-  RESERVED = 'reserved',
-  OCCUPIED = 'occupied',
-  MAINTENANCE = 'maintenance'
-}
