@@ -59,8 +59,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiSpecification))
 // ...Router
 app.use('/auth', authRouter)
 app.use('/users', userRouter)
-app.use('/category', cateRouter)
 app.use('/dishes', dishesRouter)
+app.use('/category', cateRouter)
 app.use('/tables', tableRouter)
 app.use('/orders', orderRouter)
 
