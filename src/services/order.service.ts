@@ -1,15 +1,7 @@
 import { IOrder } from '~/interfaces/order.type'
 import Order from '../models/order.model'
-import { ORDER_STATUS } from '~/constants/enum'
 
-interface getOrderParams {
-  page?: number
-  limit?: number
-  status?: ORDER_STATUS
-  search?: string
-}
-
-export const getAllOrderService = async ({ page = 1, limit = 10, status }: getOrderParams) => {
+export const getAllOrderService = async (page: number = 1, limit: number = 10, status?: string) => {
   try {
     const skip = (page - 1) * 10
 
@@ -32,6 +24,21 @@ export const getAllOrderService = async ({ page = 1, limit = 10, status }: getOr
   }
 }
 
+export const getDetailOrderByTableIdService = async (tableId: string) => {
+  try {
+    const order = await Order.findOne({ table_id: tableId }).populate('table_id').populate('user_id')
+
+    if (!order) {
+      return null
+    }
+
+    return order
+  } catch (error) {
+    console.error('Lỗi trong getOneOrderByTableIdService:', error)
+    throw error
+  }
+}
+
 export const createOrderService = async (data: IOrder): Promise<IOrder> => {
   try {
     const newOrder = await new Order(data).save()
@@ -48,5 +55,16 @@ export const updateOrderService = async (id: string, data: IOrder) => {
     return updateOrder
   } catch (error) {
     throw new Error('cannot update Oder')
+  }
+}
+
+export const updateOrderStatusService = async (id: string, status: string) => {
+  try {
+    const updatedOrder = await Order.findByIdAndUpdate(id, { status, updatedAt: new Date() }, { new: true })
+
+    return updatedOrder
+  } catch (error) {
+    // console.error('Lỗi trong updateOrderStatusService:', error)
+    throw new Error('cannot update Oder status')
   }
 }

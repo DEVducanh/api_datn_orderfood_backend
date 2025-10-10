@@ -15,7 +15,7 @@ const router = express.Router()
 /**
  * @openapi
  * tags:
- *   - name: Categories
+ *   - name: Category
  *     description: Quản lý danh mục sản phẩm (Category)
  *
  * components:
