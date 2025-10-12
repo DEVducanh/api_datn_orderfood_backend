@@ -8,7 +8,7 @@ export const getAllOrderService = async (page: number = 1, limit: number = 10, s
 
     const filter: any = {}
     if (status) {
-      filter.status = status.toLowerCase()
+      filter.status = { $regex: new RegExp(`^${status}$`, 'i') }
     }
 
     const orders = await Order.find(filter)
@@ -20,7 +20,6 @@ export const getAllOrderService = async (page: number = 1, limit: number = 10, s
 
     return orders
   } catch (error) {
-    // console.log(error)
     throw new Error('Cannot get all order !!')
   }
 }
