@@ -13,9 +13,7 @@ export const getAllOrderControler = async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string, 10) || 1
     const limit = parseInt(req.query.limit as string, 10) || 10
     let status = req.query.status as string | undefined
-    if (status) {
-      status = status.toUpperCase()
-    }
+    // console.log('Filter status:', status)
 
     const result = await getAllOrderService(page, limit, status)
 
@@ -24,7 +22,7 @@ export const getAllOrderControler = async (req: Request, res: Response) => {
       data: result
     })
   } catch (error) {
-    // console.log(error)
+    console.log(error)
     return res.status(400).json({ message: DEFAULT_MESSAGE.DEFAULT_ERROR })
   }
 }
