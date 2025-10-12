@@ -160,10 +160,10 @@ const router = express.Router()
  *         description: Cập nhật trạng thái bàn thành công
  */
 
-router.get('/', authMiddleware, getAllTableController)
-router.post('/', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), createTableController)
-router.patch('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), updateTableController)
-router.patch('/:id/status', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), updateTableStatusController)
-router.delete('/:id', authMiddleware, deleteTableController)
+router.get('/', getAllTableController)
+router.post('/', createTableController)
+router.patch('/:id', updateTableController)
+router.patch('/:id/status', updateTableStatusController)
+router.delete('/:id', deleteTableController)
 
 export default router
