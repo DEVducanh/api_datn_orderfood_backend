@@ -152,10 +152,11 @@ const router = express.Router()
  *         description: Xóa danh mục thành công
  */
 
-router.get('/', authMiddleware, getAllCategoryControler)
-router.get('/:id', authMiddleware, getOneCategoryControler)
-router.post('/', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), createCategoryControler)
-router.patch('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), updateCategoryControler)
-router.delete('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), deleteCategoryControler)
+router.get('/', getAllCategoryControler)
+router.get('/:id', getOneCategoryControler)
+// authMiddleware, roleMiddleware([USER_ROLE.ADMIN]),
+router.post('/', createCategoryControler)
+router.patch('/:id', updateCategoryControler)
+router.delete('/:id', deleteCategoryControler)
 
 export default router
