@@ -24,10 +24,10 @@ export enum TABLE_STATUS {
 }
 
 export enum ORDER_STATUS {
-  PENDING = 'PENDING',
-  IN_PROGRESS = 'IN_PROGRESS',
-  READY = 'READY',
-  SERVED = 'SERVED',
-  CANCELED = 'CANCELED',
-  COMPLETED = 'COMPLETED'
+  PENDING = 'pending',
+  IN_PROGRESS = 'in_progress',
+  READY = 'ready',
+  SERVED = 'served',
+  CANCELED = 'canceled',
+  COMPLETED = 'completed'
 }

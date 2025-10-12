@@ -1,5 +1,6 @@
 import { IOrder } from '~/interfaces/order.type'
 import Order from '../models/order.model'
+import { IO } from 'inspector/promises'
 
 export const getAllOrderService = async (page: number = 1, limit: number = 10, status?: string) => {
   try {
@@ -7,7 +8,7 @@ export const getAllOrderService = async (page: number = 1, limit: number = 10, s
 
     const filter: any = {}
     if (status) {
-      filter.status = status
+      filter.status = status.toLowerCase()
     }
 
     const orders = await Order.find(filter)
