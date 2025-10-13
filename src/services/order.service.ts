@@ -1,54 +1,70 @@
 import { IOrder } from '~/interfaces/order.type'
 import Order from '../models/order.model'
-import path from 'path'
+
+export const buildOrderPipeline = (dbQuery: any, dbSort: any, skip: number, limit: number, search?: string) => {
+  const pipeline: any[] = []
+
+  if (dbQuery && Object.keys(dbQuery).length > 0) {
+    pipeline.push({ $match: dbQuery })
+  }
+
+  pipeline.push(
+    {
+      $lookup: {
+        from: 'tables',
+        localField: 'table_id',
+        foreignField: '_id',
+        as: 'table'
+      }
+    },
+    { $unwind: { path: '$table', preserveNullAndEmptyArrays: true } }
+  )
+
+  pipeline.push(
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'user_id',
+        foreignField: '_id',
+        as: 'user'
+      }
+    },
+    { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } }
+  )
+
+  if (search && search.trim() !== '') {
+    const regex = new RegExp(search, 'i')
+    pipeline.push({
+      $match: {
+        $or: [{ 'table.table_name': regex }, { 'user.username': regex }]
+      }
+    })
+  }
+
+  if (dbSort && Object.keys(dbSort).length > 0) {
+    pipeline.push({ $sort: dbSort })
+  } else {
+    pipeline.push({ $sort: { createdAt: -1 } })
+  }
+
+  if (skip) pipeline.push({ $skip: skip })
+  if (limit) pipeline.push({ $limit: limit })
+
+  return pipeline
+}
 
 export const getAllOrderService = async (page: number = 1, limit: number = 10, status?: string, search?: string) => {
   try {
-    const skip = (page - 1) * 10
-    const match: Record<string, any> = {}
-    const filter: any = {}
+    const skip = (page - 1) * limit
+    const dbQuery: any = {}
 
     if (status) {
-      filter.status = { $regex: new RegExp(`^${status}$`, 'i') }
+      dbQuery.status = { $regex: new RegExp(`^${status}$`, 'i') }
     }
 
-    const pipeline: any[] = [
-      {
-        $lookup: {
-          from: 'tables',
-          localField: 'table_id',
-          foreignField: '_id',
-          as: 'table'
-        }
-      },
-      { $unwind: { path: '$table', preserveNullAndEmptyArrays: true } },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'user_id',
-          foreignField: '_id',
-          as: 'user'
-        }
-      },
-      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
-      { $match: match }
-    ]
+    const dbSort = { createdAt: -1 }
 
-    if (search) {
-      pipeline.push({
-        $match: {
-          $or: [
-            { 'table.table_name': { $regex: search, $options: 'i' } },
-            { 'user.username': { $regex: search, $options: 'i' } }
-          ]
-        }
-      })
-    }
-
-    pipeline.push({ $sort: { createdAt: -1 } })
-    pipeline.push({ $skip: skip })
-    pipeline.push({ $limit: limit })
-
+    const pipeline = buildOrderPipeline(dbQuery, dbSort, skip, limit, search)
     const orders = await Order.aggregate(pipeline)
 
     return orders
@@ -87,7 +103,7 @@ export const updateOrderService = async (id: string, data: IOrder) => {
     const updateOrder = await Order.findByIdAndUpdate(id, data, { new: true })
     return updateOrder
   } catch (error) {
-    throw new Error('cannot update Oder')
+    throw new Error('cannot update Order')
   }
 }
 
@@ -98,15 +114,15 @@ export const updateOrderStatusService = async (id: string, status: string) => {
     return updatedOrder
   } catch (error) {
     // console.error('Lỗi trong updateOrderStatusService:', error)
-    throw new Error('cannot update Oder status')
+    throw new Error('cannot update Order status')
   }
 }
 
 export const deleteOrderService = async (id: string) => {
   try {
-    const deleteOrder = await Order.findByIdAndDelete(id, { new: true })
-    return deleteOrder
+    const order = await Order.findByIdAndDelete(id, { new: true })
+    return order
   } catch (error) {
-    throw new Error('cannot delete Oder')
+    throw new Error('cannot delete Order')
   }
 }

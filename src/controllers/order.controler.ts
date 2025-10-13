@@ -13,8 +13,8 @@ export const getAllOrderControler = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string, 10) || 1
     const limit = parseInt(req.query.limit as string, 10) || 10
-    let status = req.query.status as string | undefined
-    let search = req.query.search as string | undefined
+    const status = req.query.status as string
+    const search = req.query.search as string | undefined
 
     const result = await getAllOrderService(page, limit, status, search)
 
@@ -97,13 +97,11 @@ export const updateOrderStatusController = async (req: Request, res: Response) =
   }
 }
 
-export const deleteOrderController = async (req: Request, res: Response) => {
+export const deleteOrderControler = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
-    const deleteOrder = await deleteOrderService(id)
-    return res.status(200).json({
-      message: DEFAULT_MESSAGE.DEFAULT_SUCCESS
-    })
+    await deleteOrderService(id)
+    return res.status(200).json({ message: DEFAULT_MESSAGE.DEFAULT_SUCCESS })
   } catch (error) {
     return res.status(400).json({ message: DEFAULT_MESSAGE.DEFAULT_ERROR })
   }
