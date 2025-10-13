@@ -1,6 +1,7 @@
 import express from 'express'
 import {
   createOrderControler,
+  deleteOrderController,
   getAllOrderControler,
   getDetailOrderByTableIdController,
   updateOrderControler,
@@ -38,6 +39,12 @@ const router = express.Router()
  *           type: string
  *           example: READY
  *         description: Lọc theo trạng thái đơn hàng
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *           example: "Ban 1"
+ *         description: Tìm kiếm theo tên bàn hoặc tên người dùng
  *     responses:
  *       200:
  *         description: Lấy danh sách đơn hàng thành công
@@ -121,6 +128,32 @@ const router = express.Router()
  *       404:
  *         description: Không tìm thấy đơn hàng
  *
+ *   delete:
+ *     summary: Xóa đơn hàng
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của đơn hàng cần xóa
+ *     responses:
+ *       200:
+ *         description: Xóa đơn hàng thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Đơn hàng đã được xóa thành công"
+ *       404:
+ *         description: Không tìm thấy đơn hàng
+ *       500:
+ *         description: Lỗi server
+ *
  * /orders/{id}/status:
  *   patch:
  *     summary: Cập nhật trạng thái của đơn hàng
@@ -155,6 +188,7 @@ router.get('/', getAllOrderControler)
 router.get('/:tableId', getDetailOrderByTableIdController)
 router.post('/', createOrderControler)
 router.patch('/:id', updateOrderControler)
+router.delete('/:id', deleteOrderController)
 router.patch('/:id/status', updateOrderStatusController)
 
 export default router

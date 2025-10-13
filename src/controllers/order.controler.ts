@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { DEFAULT_MESSAGE } from '~/constants/message'
 import {
   createOrderService,
+  deleteOrderService,
   getAllOrderService,
   getDetailOrderByTableIdService,
   updateOrderService,
@@ -13,18 +14,16 @@ export const getAllOrderControler = async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string, 10) || 1
     const limit = parseInt(req.query.limit as string, 10) || 10
     let status = req.query.status as string | undefined
-    if (status) {
-      status = status.toUpperCase()
-    }
+    let search = req.query.search as string | undefined
 
-    const result = await getAllOrderService(page, limit, status)
+    const result = await getAllOrderService(page, limit, status, search)
 
     return res.status(200).json({
       message: DEFAULT_MESSAGE.DEFAULT_SUCCESS,
       data: result
     })
   } catch (error) {
-    // console.log(error)
+    console.log(error)
     return res.status(400).json({ message: DEFAULT_MESSAGE.DEFAULT_ERROR })
   }
 }
@@ -92,6 +91,18 @@ export const updateOrderStatusController = async (req: Request, res: Response) =
     return res.status(200).json({
       message: DEFAULT_MESSAGE.DEFAULT_SUCCESS,
       data: updateOrder
+    })
+  } catch (error) {
+    return res.status(400).json({ message: DEFAULT_MESSAGE.DEFAULT_ERROR })
+  }
+}
+
+export const deleteOrderController = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+    const deleteOrder = await deleteOrderService(id)
+    return res.status(200).json({
+      message: DEFAULT_MESSAGE.DEFAULT_SUCCESS
     })
   } catch (error) {
     return res.status(400).json({ message: DEFAULT_MESSAGE.DEFAULT_ERROR })

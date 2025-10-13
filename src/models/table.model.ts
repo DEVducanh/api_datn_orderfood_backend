@@ -6,7 +6,7 @@ export const TableSchema = new mongoose.Schema<ITable>(
   {
     table_name: { type: String, required: true },
     qr_code: { type: String, required: true },
-    status: { type: String, enum: TABLE_STATUS, default: TABLE_STATUS.EMTY },
+    status: { type: String, enum: TABLE_STATUS, default: TABLE_STATUS.EMPTY },
     capacity: { type: Number, required: true }
   },
   { timestamps: false, versionKey: false }
