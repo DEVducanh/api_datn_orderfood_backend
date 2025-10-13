@@ -3,7 +3,6 @@ import { DEFAULT_MESSAGE } from '~/constants/message'
 import {
   createOrderService,
   deleteOrderService,
-  deleteOrderService,
   getAllOrderService,
   getDetailOrderByTableIdService,
   updateOrderService,
