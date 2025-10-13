@@ -33,6 +33,7 @@ const router = express.Router()
  *         password:
  *           type: string
  *           example: 123456
+ *           writeOnly: true
  *         phone:
  *           type: string
  *           example: 0987654321
@@ -122,10 +123,10 @@ const router = express.Router()
  *         description: Xóa người dùng thành công
  */
 
-router.get('/', authMiddleware, getAllUserControler)
-router.get('/:id', authMiddleware, getOneUserControler)
-router.post('/', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), createUserControler)
-router.patch('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), updateUserControler)
-router.delete('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), deleteUserControler)
+router.get('/', getAllUserControler)
+router.get('/:id', getOneUserControler)
+router.post('/', createUserControler)
+router.patch('/:id', updateUserControler)
+router.delete('/:id', deleteUserControler)
 
 export default router

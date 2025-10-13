@@ -3,6 +3,7 @@ import { DEFAULT_MESSAGE } from '~/constants/message'
 import {
   createOrderService,
   deleteOrderService,
+  deleteOrderService,
   getAllOrderService,
   getDetailOrderByTableIdService,
   updateOrderService,
@@ -23,7 +24,7 @@ export const getAllOrderControler = async (req: Request, res: Response) => {
       data: result
     })
   } catch (error) {
-    // console.log(error)
+    console.log(error)
     return res.status(400).json({ message: DEFAULT_MESSAGE.DEFAULT_ERROR })
   }
 }

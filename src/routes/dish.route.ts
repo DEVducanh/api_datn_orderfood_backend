@@ -57,7 +57,6 @@ const router = express.Router()
  *         required: false
  *         schema:
  *           type: string
- *           example: trà sữa
  *       - name: status
  *         in: query
  *         description: Lọc theo trạng thái (0 - hết hàng, 1 - còn hàng)
@@ -71,14 +70,6 @@ const router = express.Router()
  *         required: false
  *         schema:
  *           type: string
- *           example: 68df56811d6f96e6b2b21297
- *       - name: page
- *         in: query
- *         description: Trang hiện tại (phân trang)
- *         required: false
- *         schema:
- *           type: integer
- *           example: 1
  *     responses:
  *       200:
  *         description: Danh sách món ăn
@@ -161,10 +152,10 @@ const router = express.Router()
  *         description: Xóa thành công
  */
 
-router.get('/', authMiddleware, getAllDishControler)
-router.get('/:id', authMiddleware, getOneDishControler)
-router.post('/', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), createDishControler)
-router.patch('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), updateDishControler)
-router.delete('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), deleteDishControler)
+router.get('/', getAllDishControler)
+router.get('/:id', getOneDishControler)
+router.post('/', createDishControler)
+router.patch('/:id', updateDishControler)
+router.delete('/:id', deleteDishControler)
 
 export default router

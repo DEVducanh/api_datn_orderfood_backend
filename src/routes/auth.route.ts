@@ -66,9 +66,6 @@ const router = express.Router()
  *             email:
  *               type: string
  *               example: "phuonganhpham11@gmail.com"
- *             password:
- *               type: string
- *               example: "$2b$10$tQsbOdumEjTtqTqFLZKzueK5VlzWcNJXZpzFgJU/oXeDlSlRosmuW"
  *             phone:
  *               type: string
  *               example: "0987654321"

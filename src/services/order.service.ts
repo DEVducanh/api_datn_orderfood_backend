@@ -69,7 +69,6 @@ export const getAllOrderService = async (page: number = 1, limit: number = 10, s
 
     return orders
   } catch (error) {
-    // console.log(error)
     throw new Error('Cannot get all order !!')
   }
 }
@@ -85,7 +84,7 @@ export const getDetailOrderByTableIdService = async (tableId: string) => {
     return order
   } catch (error) {
     console.error('Lỗi trong getOneOrderByTableIdService:', error)
-    throw error
+    throw new Error('Cannot get order by table id !!')
   }
 }
 
