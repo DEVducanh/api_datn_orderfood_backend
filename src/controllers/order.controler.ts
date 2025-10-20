@@ -16,7 +16,6 @@ export const getAllOrderControler = async (req: Request, res: Response) => {
     const status = req.query.status as string
     const search = req.query.search as string | undefined
 
-
     const result = await getAllOrderService(page, limit, status, search)
 
     return res.status(200).json({
