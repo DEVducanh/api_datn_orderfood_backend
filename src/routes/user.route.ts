@@ -39,7 +39,7 @@ const router = express.Router()
  *           example: 0987654321
  *         role:
  *           type: number
- *           description: 0 - User, 1 - Admin
+ *           description: Vai trò người dùng (0 - Customer, 1 - Waiter, 2 - Cashier, 3 - Chef, 4 - Admin)
  *           example: 0
  *         createdAt:
  *           type: string
@@ -65,6 +65,60 @@ const router = express.Router()
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/User'
+ *
+ *   post:
+ *     summary: Tạo mới người dùng
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - email
+ *               - password
+ *               - role
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: chef01
+ *               email:
+ *                 type: string
+ *                 example: chef01@example.com
+ *               password:
+ *                 type: string
+ *                 example: 123456
+ *               phone:
+ *                 type: string
+ *                 example: 0988888888
+ *               role:
+ *                 type: number
+ *                 description: Vai trò người dùng (0 - Customer, 1 - Waiter, 2 - Cashier, 3 - Chef, 4 - Admin)
+ *                 example: 3
+ *     responses:
+ *       201:
+ *         description: Tạo người dùng thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Tạo người dùng thất bại (ví dụ vai trò đã tồn tại)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Vai trò này (4) đã có tài khoản, không thể tạo thêm.
  *
  * /users/{id}:
  *   get:
@@ -106,6 +160,8 @@ const router = express.Router()
  *     responses:
  *       200:
  *         description: Cập nhật thành công
+ *       400:
+ *         description: Lỗi cập nhật người dùng
  *
  *   delete:
  *     summary: Xóa người dùng
@@ -121,12 +177,15 @@ const router = express.Router()
  *     responses:
  *       200:
  *         description: Xóa người dùng thành công
+ *       400:
+ *         description: Lỗi khi xóa người dùng
  */
 
-router.get('/', authMiddleware, getAllUserControler)
-router.get('/:id', authMiddleware, getOneUserControler)
-router.post('/', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), createUserControler)
-router.patch('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), updateUserControler)
-router.delete('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), deleteUserControler)
+router.get('/', getAllUserControler)
+router.post('/', createUserControler)
+router.get('/:id', getOneUserControler)
+router.post('/', createUserControler)
+router.patch('/:id', updateUserControler)
+router.delete('/:id', deleteUserControler)
 
 export default router

@@ -1,6 +1,5 @@
 import { IOrder } from '~/interfaces/order.type'
 import Order from '../models/order.model'
-import { IO } from 'inspector/promises'
 
 export const buildOrderPipeline = (dbQuery: any, dbSort: any, skip: number, limit: number, search?: string) => {
   const pipeline: any[] = []
@@ -85,7 +84,7 @@ export const getDetailOrderByTableIdService = async (tableId: string) => {
     return order
   } catch (error) {
     console.error('Lỗi trong getOneOrderByTableIdService:', error)
-    throw error
+    throw new Error('Cannot get order by table id !!')
   }
 }
 

@@ -1,6 +1,7 @@
 import { IDishes } from '~/interfaces/dish.type'
 import Dish from '../models/dish.model'
 import { IUser } from '~/interfaces/user.type'
+import mongoose from 'mongoose'
 
 export const getAllDishService = async (
   search?: string,
@@ -22,7 +23,7 @@ export const getAllDishService = async (
 
     // lọc theo category
     if (categoryId) {
-      query.category_id = categoryId
+      query.category_id = new mongoose.Types.ObjectId(categoryId)
     }
     const skip = (page - 1) * limit
 

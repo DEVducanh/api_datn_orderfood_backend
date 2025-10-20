@@ -5,7 +5,7 @@ import { ICategory } from '~/interfaces/category.type'
 export const CategorySchema = new mongoose.Schema<ICategory>(
   {
     category_name: { type: String, required: true },
-    description: { type: String, required: true },
+    description: { type: String },
     imageUrl: { type: String, required: true },
     status: {
       type: Number,
