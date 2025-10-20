@@ -2,10 +2,17 @@ import { ILogin, IRegister } from '~/interfaces/user.type'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import User from '../models/user.model'
+import { USER_ROLE } from '~/constants/enum'
 
 export const registerService = async (data: IRegister) => {
   try {
     const { username, email, password, phone, role } = data
+
+    const numericRole = Number(role)
+    if ([USER_ROLE.WAITER, USER_ROLE.CASHIER, USER_ROLE.CHEF, USER_ROLE.ADMIN].includes(numericRole)) {
+      throw new Error('Không được phép đăng ký vai trò này. Vui lòng liên hệ Admin để được tạo tài khoản.')
+    }
+
     const exitingUser = await User.findOne({ email })
     if (exitingUser) {
       throw new Error('Email already exists')
@@ -20,10 +27,9 @@ export const registerService = async (data: IRegister) => {
       role
     })
     return newUser
-  } catch (error) {
+  } catch (error: any) {
     console.log(error)
-
-    throw new Error('Cannot register')
+    throw new Error(error.message || 'Cannot register')
   }
 }
 
@@ -42,7 +48,7 @@ export const loginService = async (data: ILogin) => {
 
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET as string, { expiresIn: '24h' })
     return { user, token }
-  } catch (error) {
-    throw new Error('Cannot login')
+  } catch (error: any) {
+    throw new Error(error.message || 'Cannot login')
   }
 }
