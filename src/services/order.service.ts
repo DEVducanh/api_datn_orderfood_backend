@@ -1,5 +1,6 @@
 import { IOrder } from '~/interfaces/order.type'
 import Order from '../models/order.model'
+import { IO } from 'inspector/promises'
 
 export const buildOrderPipeline = (dbQuery: any, dbSort: any, skip: number, limit: number, search?: string) => {
   const pipeline: any[] = []
@@ -69,7 +70,6 @@ export const getAllOrderService = async (page: number = 1, limit: number = 10, s
 
     return orders
   } catch (error) {
-    // console.log(error)
     throw new Error('Cannot get all order !!')
   }
 }
