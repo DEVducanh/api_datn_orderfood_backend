@@ -59,13 +59,6 @@ const router = express.Router()
  *         required: false
  *         schema:
  *           type: integer
- *       - name: page
- *         in: query
- *         description: Trang hiện tại (phân trang)
- *         required: false
- *         schema:
- *           type: integer
- *           example: 1
  *     responses:
  *       200:
  *         description: Danh sách danh mục
