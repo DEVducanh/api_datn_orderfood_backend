@@ -15,18 +15,15 @@ export const getAllCategoryService = async (search?: string, status?: string, pa
       query.status = status
     }
 
-    const limit = 6 // cố định 6 item mỗi trang
-    const skip = (page - 1) * limit
+    // const limit = 6  cố định 6 item mỗi trang
+    // const skip = (page - 1) * limit
 
-    const [data, total] = await Promise.all([
-      Category.find(query).skip(skip).limit(limit),
-      Category.countDocuments(query)
-    ])
+    const [data, total] = await Promise.all([Category.find(query), Category.countDocuments(query)])
     return {
       total,
       page,
-      limit,
-      totalPages: Math.ceil(total / limit),
+      // limit,
+      // totalPages: Math.ceil(total / limit),
       data
     }
   } catch (error) {
