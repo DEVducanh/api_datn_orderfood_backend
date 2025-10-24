@@ -1,3 +1,4 @@
+import { Types } from 'mongoose'
 import { ORDER_STATUS } from '~/constants/enum'
 
 export interface IOrder {
