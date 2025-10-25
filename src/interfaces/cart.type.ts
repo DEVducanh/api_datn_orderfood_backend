@@ -1,4 +1,5 @@
 import { Types } from 'mongoose'
+import { IDishes } from './dish.type'
 
 export interface ICart {
   //   _id?: Types.ObjectId
@@ -10,7 +11,7 @@ export interface ICart {
 
 export interface ICart_item {
   cart_id: Types.ObjectId
-  dish_id: Types.ObjectId
+  dish_id: Types.ObjectId | IDishes
   quantity: number
   price: number
   note?: string
