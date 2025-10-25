@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { DEFAULT_MESSAGE } from '~/constants/message'
+import { checkoutCartService } from '~/services/cart.service'
 import {
   createOrderService,
   deleteOrderService,
@@ -106,5 +107,31 @@ export const deleteOrderControler = async (req: Request, res: Response) => {
     return res.status(200).json({ message: DEFAULT_MESSAGE.DEFAULT_SUCCESS })
   } catch (error) {
     return res.status(400).json({ message: DEFAULT_MESSAGE.DEFAULT_ERROR })
+  }
+}
+
+export const checkoutCartController = async (req: Request, res: Response) => {
+  try {
+    const { user_id, table_id } = req.body
+
+    if (!user_id || !table_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'user_id and table_id are required'
+      })
+    }
+
+    const order = await checkoutCartService(user_id, table_id)
+
+    res.status(201).json({
+      success: true,
+      message: 'Order created successfully',
+      data: order
+    })
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to checkout cart'
+    })
   }
 }

@@ -11,13 +11,16 @@ export const CartSchema = new mongoose.Schema<ICart>(
   { timestamps: true, versionKey: false }
 )
 
-export const Cart_ItemSchema = new mongoose.Schema<ICart_item>({
-  cart_id: { type: Schema.Types.ObjectId, ref: 'Carts', required: true },
-  dish_id: { type: Schema.Types.ObjectId, ref: 'Dishes', required: true },
-  quantity: { type: Number, default: 1 },
-  price: { type: Number },
-  note: { type: String }
-})
+export const Cart_ItemSchema = new mongoose.Schema<ICart_item>(
+  {
+    cart_id: { type: Schema.Types.ObjectId, ref: 'Carts', required: true },
+    dish_id: { type: Schema.Types.ObjectId, ref: 'Dishes', required: true },
+    quantity: { type: Number, default: 1 },
+    price: { type: Number },
+    note: { type: String }
+  },
+  { versionKey: false }
+)
 
 export const Cart_Item = mongoose.model<ICart_item>('Cart_Items', Cart_ItemSchema)
 export default mongoose.model<ICart>('Carts', CartSchema)
