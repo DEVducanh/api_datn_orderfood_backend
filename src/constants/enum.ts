@@ -31,3 +31,22 @@ export enum ORDER_STATUS {
   CANCELED = 'Cancelled',
   COMPLETED = 'Completed'
 }
+
+export enum TYPE_FEEDBACK {
+  DISHES = 'Dish',
+  SERVICE = 'Service',
+  APP = 'App'
+}
+
+export enum STATUS_FEEDBACK {
+  PENDING = 'Pending',
+  RESOLVED = 'Resolved',
+  REJECTED = 'Rejected'
+}
+
+export enum STATUS_INVOICES {
+  UNPAID = 'unpaid',
+  PAID = 'paid',
+  CANCELED = 'canceled',
+  MERGED = 'merged'
+}
