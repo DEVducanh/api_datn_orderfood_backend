@@ -1,8 +1,43 @@
 import { ORDER_STATUS } from '~/constants/enum'
-import Cart, { Cart_Item } from '../models/cart.model'
+import { Cart_Item, Cart } from '../models/cart.model'
 import Order from '../models/order.model'
+import OrderItem from '../models/order-item.model'
 import Dish from '../models/dish.model'
 import { IDishes } from '~/interfaces/dish.type'
+
+export const getOneCartService = async (table_id: string, user_id: string) => {
+  // Tìm cart theo table_id
+  const cart = await Cart.findOne({ table_id, user_id })
+  if (!cart) {
+    return null
+  }
+
+  const items = await Cart_Item.find({ cart_id: cart._id }).populate<{ dish_id: IDishes }>(
+    'dish_id',
+    'dish_name imageUrl price'
+  )
+
+  // Format dữ liệu để trả ra frontend
+  const formattedItems = items.map((item) => ({
+    dish_name: item.dish_id?.dish_name,
+    image: item.dish_id?.imageUrl || null,
+    quantity: item.quantity,
+    price: item.price,
+    subtotal: item.price * item.quantity,
+    note: item.note || ''
+  }))
+
+  // Tính tổng tiền giỏ hàng
+  const total_price = formattedItems.reduce((sum, item) => sum + item.subtotal, 0)
+
+  // Trả kết quả cuối cùng
+  return {
+    table_id: cart.table_id,
+    user_id: cart.user_id,
+    total_price,
+    items: formattedItems
+  }
+}
 
 export const createCartService = async (user_id: string, table_id: string) => {
   try {
@@ -36,7 +71,7 @@ export const addToCartService = async (user_id: string, table_id: string, dish_i
     const dish = await Dish.findById(dish_id)
     if (!dish) throw new Error('Dish not found')
 
-    const price = dish.price
+    // const price = dish.price
     if (cart_item) {
       cart_item.quantity += quantity
       // cart_item.price = cart_item.quantity * dish.price
@@ -62,7 +97,7 @@ export const addToCartService = async (user_id: string, table_id: string, dish_i
       message: 'Dish added to cart successfully',
       data: {
         cart,
-        cart_item
+        cart_items: cartItems
       }
     }
   } catch (error) {
@@ -73,71 +108,73 @@ export const addToCartService = async (user_id: string, table_id: string, dish_i
 
 export const checkoutCartService = async (user_id: string, table_id: string) => {
   try {
-    // Lấy giỏ hàng hiện tại
+    // Tìm giỏ hàng hiện tại
     const cart = await Cart.findOne({ user_id, table_id })
     if (!cart) throw new Error('Cart not found')
 
-    // Lấy danh sách món trong cart
+    // Lấy các món trong giỏ hàng
     const cartItems = await Cart_Item.find({ cart_id: cart._id })
     if (cartItems.length === 0) throw new Error('Cart is empty')
 
-    //Tính tổng tiền
+    // Tính tổng tiền
     const total_price = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
-    //Tạo order chính thức
+    // Tạo đơn hàng chính
     const order = await Order.create({
       user_id,
       table_id,
-      items: cartItems.map((item) => ({
-        dish_id: item.dish_id,
-        quantity: item.quantity,
-        price: item.price,
-        note: item.note
-      })),
       total_price,
       status: ORDER_STATUS.PENDING,
       created_at: new Date()
     })
 
-    // Xóa các cart_item sau khi đặt hàng
-    await Cart_Item.deleteMany({ cart_id: cart._id })
+    // Tạo danh sách order_items tương ứng
+    const orderItemsData = cartItems.map((item) => ({
+      order_id: order._id,
+      dish_id: item.dish_id,
+      quantity: item.quantity,
+      price: item.price,
+      subtotal: item.price * item.quantity,
+      note: item.note
+    }))
 
-    //Reset cart
+    await OrderItem.insertMany(orderItemsData)
+
+    // Xóa giỏ hàng sau khi đặt hàng
+    await Cart_Item.deleteMany({ cart_id: cart._id })
     cart.total_price = 0
     await cart.save()
 
-    return order
-  } catch (error) {
-    console.error('Checkout error:', error)
-    throw new Error('Error while checking out cart')
-  }
-}
+    // Populate dữ liệu để trả về đầy đủ
+    const orderWithItems = await OrderItem.find({ order_id: order._id }).populate('dish_id', 'dish_name imageUrl price')
 
-export const getCartByTableIdService = async (table_id: string) => {
-  // Tìm cart theo table_id
-  const cart = await Cart.findOne({ table_id })
-  if (!cart) {
-    return null
-  }
+    // Format dữ liệu đẹp
+    const formattedItems = orderWithItems.map((item) => ({
+      dish_name: (item.dish_id as any)?.dish_name,
+      image: (item.dish_id as any)?.imageUrl || null,
+      quantity: item.quantity,
+      price: item.price,
+      subtotal: item.subtotal,
+      note: item.note
+    }))
 
-  // Lấy danh sách item trong cart
-  const items = await Cart_Item.find({ cart_id: cart._id }).populate<{ dish_id: IDishes }>('dish_id')
-
-  //Format dữ liệu
-  const formattedItems = items.map((item) => ({
-    dish_name: item.dish_id?.dish_name,
-    quantity: item.quantity,
-    price: item.price
-  }))
-
-  // Tính tổng tiền
-  const total_price = formattedItems.reduce((sum, i) => sum + i.price, 0)
-
-  //  Trả về object hoàn chỉnh
-  return {
-    table_id: cart.table_id,
-    total_price,
-    items: formattedItems
+    return {
+      success: true,
+      message: 'Checkout successfully!',
+      data: {
+        order_id: order._id,
+        table_id,
+        total_price,
+        status: order.status,
+        items: formattedItems
+      }
+    }
+  } catch (error: any) {
+    // console.error('Checkout error:', error)
+    return {
+      success: false,
+      message: error.message || 'Error while checking out cart'
+    }
   }
 }
 

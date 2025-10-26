@@ -2,7 +2,7 @@ import express from 'express'
 import {
   addToCartControler,
   createCartController,
-  getCartByTableIdController,
+  getOneCartController,
   removeCartItemController
 } from '~/controllers/cart.controler'
 import { checkoutCartController } from '~/controllers/order.controler'
@@ -27,6 +27,8 @@ const router = express.Router()
  *           schema:
  *             type: object
  *             properties:
+ *               user_id:
+ *                 type: string
  *               table_id:
  *                 type: string
  *                 example: "A01"
@@ -40,9 +42,9 @@ const router = express.Router()
  *       200:
  *         description: Thêm sản phẩm thành công và trả về giỏ hàng mới nhất
  *
- * /cart/table/{table_id}:
+ * /cart/{table_id}/{user_id}:
  *   get:
- *     summary: Lấy giỏ hàng theo mã bàn
+ *     summary: Lấy giỏ hàng theo mã bàn và người dùng
  *     description: FE gọi API này để hiển thị danh sách món trong giỏ của bàn.
  *     tags: [Cart]
  *     parameters:
@@ -52,6 +54,12 @@ const router = express.Router()
  *         schema:
  *           type: string
  *           example: "A01"
+ *       - in: path
+ *         name: user_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: "671ac9..."
  *     responses:
  *       200:
  *         description: Trả về chi tiết giỏ hàng (gồm danh sách sản phẩm, số lượng, giá)
@@ -84,10 +92,10 @@ const router = express.Router()
  *           schema:
  *             type: object
  *             properties:
- *               table_id:
+ *               user_id:
  *                 type: string
  *                 example: "A01"
- *               payment_method:
+ *               table_id:
  *                 type: string
  *                 example: "cash"
  *     responses:
@@ -97,7 +105,7 @@ const router = express.Router()
 
 router.post('/', createCartController)
 router.post('/add-item', addToCartControler)
-router.get('/table/:table_id', getCartByTableIdController)
+router.get('/:table_id/:user_id', getOneCartController)
 router.delete('/item/:cart_item_id', removeCartItemController)
 router.post('/checkout', checkoutCartController)
 
