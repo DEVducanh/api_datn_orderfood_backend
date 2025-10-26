@@ -10,17 +10,24 @@ export const CartSchema = new mongoose.Schema<ICart>(
   },
   { timestamps: true, versionKey: false }
 )
+export const Cart = mongoose.model<ICart>('Carts', CartSchema)
 
-export const Cart_ItemSchema = new mongoose.Schema<ICart_item>(
+export const CartItemSchema = new mongoose.Schema<ICart_item>(
   {
     cart_id: { type: Schema.Types.ObjectId, ref: 'Carts', required: true },
     dish_id: { type: Schema.Types.ObjectId, ref: 'Dishes', required: true },
     quantity: { type: Number, default: 1 },
     price: { type: Number },
+    subtotal: { type: Number, default: 0 },
     note: { type: String }
   },
   { versionKey: false }
 )
 
-export const Cart_Item = mongoose.model<ICart_item>('Cart_Items', Cart_ItemSchema)
-export default mongoose.model<ICart>('Carts', CartSchema)
+CartItemSchema.pre('save', function (next) {
+  this.subtotal = this.price * this.quantity
+  next()
+})
+
+export const Cart_Item = mongoose.model<ICart_item>('Cart_Items', CartItemSchema)
+// export default mongoose.model<ICart>('Carts', CartSchema)
