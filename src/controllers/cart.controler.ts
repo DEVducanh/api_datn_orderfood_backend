@@ -1,11 +1,6 @@
 import { Request, Response } from 'express'
 import { DEFAULT_MESSAGE } from '~/constants/message'
-import {
-  addToCartService,
-  createCartService,
-  getCartByTableIdService,
-  removeCartItemService
-} from '~/services/cart.service'
+import { addToCartService, createCartService, removeCartItemService, getOneCartService } from '~/services/cart.service'
 
 export const createCartController = async (req: Request, res: Response) => {
   try {
@@ -64,11 +59,11 @@ export const addToCartControler = async (req: Request, res: Response) => {
   }
 }
 
-export const getCartByTableIdController = async (req: Request, res: Response) => {
+export const getOneCartController = async (req: Request, res: Response) => {
   try {
-    const { table_id } = req.params
+    const { table_id, user_id } = req.params
 
-    const cartData = await getCartByTableIdService(table_id)
+    const cartData = await getOneCartService(table_id, user_id)
 
     if (!cartData) {
       return res.status(404).json({
@@ -79,6 +74,7 @@ export const getCartByTableIdController = async (req: Request, res: Response) =>
 
     res.status(200).json({
       success: true,
+      message: 'Cart fetched successfully',
       data: cartData
     })
   } catch (error: any) {
