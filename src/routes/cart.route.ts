@@ -43,7 +43,7 @@ const router = express.Router()
  *       200:
  *         description: Thêm sản phẩm thành công và trả về giỏ hàng mới nhất
  *
- * /cart/{table_id}/{user_id}:
+ * /cart/cart-item/{table_id}/{user_id}:
  *   get:
  *     summary: Lấy giỏ hàng theo mã bàn và người dùng
  *     description: FE gọi API này để hiển thị danh sách món trong giỏ của bàn.
@@ -131,7 +131,7 @@ const router = express.Router()
  */
 
 router.post('/', createCartController)
-router.get('/:table_id/:user_id', getOneCartController)
+router.get('/cart-item/:table_id/:user_id', getOneCartController)
 router.post('/add-item', addToCartControler)
 router.post('/checkout', checkoutCartController)
 router.patch('/:cart_item_id/quantity', updateQuantiCartItemControler)

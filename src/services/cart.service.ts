@@ -21,6 +21,7 @@ export const getOneCartService = async (table_id: string, user_id: string) => {
 
   // Format dữ liệu để trả ra frontend
   const formattedItems = items.map((item) => ({
+    cart_item_id: item._id,
     dish_name: item.dish_id?.dish_name,
     image: item.dish_id?.imageUrl || null,
     quantity: item.quantity,
