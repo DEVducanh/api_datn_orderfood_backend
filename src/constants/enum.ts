@@ -32,6 +32,14 @@ export enum ORDER_STATUS {
   COMPLETED = 'Completed'
 }
 
+export enum ORDER_ITEM_STATUS {
+  PENDING = 'Pending',
+  PROCESSING = 'Processing',
+  READY = 'Ready',
+  SERVED = 'Served',
+  CANCELED = 'Cancelled'
+}
+
 export enum TYPE_FEEDBACK {
   DISHES = 'Dish',
   SERVICE = 'Service',
