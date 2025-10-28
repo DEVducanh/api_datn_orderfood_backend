@@ -8,8 +8,9 @@ import cateRouter from './routes/cate.route'
 import dishesRouter from './routes/dish.route'
 import tableRouter from './routes/table.route'
 import orderRouter from './routes/order.route'
-import cartRouter from './routes/cart.route'
 import orderItemRouter from './routes/order-item.route'
+import invoices from './routes/invoice.route'
+import cartRouter from './routes/cart.route'
 
 import swaggerUi from 'swagger-ui-express'
 import swaggerJSDoc from 'swagger-jsdoc'
@@ -67,6 +68,7 @@ app.use('/category', cateRouter)
 app.use('/tables', tableRouter)
 app.use('/orders', orderRouter)
 app.use('/order-item', orderItemRouter)
+app.use('/invoices', invoices)
 app.use('/cart', cartRouter)
 
 app.listen(PORT, () => console.log(`Server running at http://${HOST}:${PORT}`))
