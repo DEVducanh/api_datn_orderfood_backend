@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { createInvoiceService, getAllInvoiceService } from '~/services/invoices.service'
+import { createInvoiceService, getAllInvoiceService, getDetailInvoicesService } from '~/services/invoices.service'
 
 export const getAllInvoiceController = async (req: Request, res: Response) => {
   try {
@@ -19,11 +19,33 @@ export const getAllInvoiceController = async (req: Request, res: Response) => {
   }
 }
 
+export const getDetailInvoiceControler = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+
+    const result = await getDetailInvoicesService(id)
+
+    if (!result.success) {
+      return res.status(404).json({
+        success: false,
+        message: result.message
+      })
+    }
+
+    return res.status(200).json(result)
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Error creating invoice'
+    })
+  }
+}
+
 export const createInvoiceController = async (req: Request, res: Response) => {
   try {
-    const { user_id, table_id, order_id, total_amount } = req.body
+    const { order_id } = req.body
 
-    if (!table_id || !order_id || !total_amount) {
+    if (!order_id) {
       return res.status(400).json({
         success: false,
         message: 'Missing required fields'
@@ -31,10 +53,7 @@ export const createInvoiceController = async (req: Request, res: Response) => {
     }
 
     const result = await createInvoiceService({
-      user_id: user_id || null,
-      table_id,
-      order_id,
-      total_amount
+      order_id
     })
 
     if (!result.success) {
