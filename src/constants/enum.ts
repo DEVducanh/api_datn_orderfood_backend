@@ -58,3 +58,14 @@ export enum STATUS_INVOICES {
   CANCELED = 'canceled',
   MERGED = 'merged'
 }
+
+export enum STATUS_PAYMENTS {
+  SUCCESS = 'Success',
+  FAILED = 'Failed',
+  REFUNDED = 'Refunded'
+}
+
+export enum PAYMENT_METHOD {
+  CASH = 'Cash',
+  BANK = 'Bank_Transfer'
+}
