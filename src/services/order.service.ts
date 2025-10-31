@@ -1,7 +1,7 @@
 import { IOrder } from '~/interfaces/order.type'
 import Order from '../models/order.model'
 
-export const buildOrderPipeline = (dbQuery: any, dbSort: any, skip: number, limit: number, search?: string) => {
+export const buildOrderPipeline = (dbQuery: any, dbSort: any, search?: string) => {
   const pipeline: any[] = []
 
   if (dbQuery && Object.keys(dbQuery).length > 0) {
@@ -47,15 +47,11 @@ export const buildOrderPipeline = (dbQuery: any, dbSort: any, skip: number, limi
     pipeline.push({ $sort: { createdAt: -1 } })
   }
 
-  if (skip) pipeline.push({ $skip: skip })
-  if (limit) pipeline.push({ $limit: limit })
-
   return pipeline
 }
 
-export const getAllOrderService = async (page: number = 1, limit: number = 10, status?: string, search?: string) => {
+export const getAllOrderService = async (page: number = 1, status?: string, search?: string) => {
   try {
-    const skip = (page - 1) * limit
     const dbQuery: any = {}
 
     if (status) {
@@ -64,7 +60,7 @@ export const getAllOrderService = async (page: number = 1, limit: number = 10, s
 
     const dbSort = { createdAt: -1 }
 
-    const pipeline = buildOrderPipeline(dbQuery, dbSort, skip, limit, search)
+    const pipeline = buildOrderPipeline(dbQuery, dbSort, search)
     const orders = await Order.aggregate(pipeline)
 
     return orders

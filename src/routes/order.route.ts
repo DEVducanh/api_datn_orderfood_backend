@@ -22,18 +22,6 @@ const router = express.Router()
  *     tags: [Orders]
  *     parameters:
  *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           example: 1
- *         description: Số trang
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           example: 10
- *         description: Giới hạn số đơn hàng mỗi trang
- *       - in: query
  *         name: status
  *         schema:
  *           type: string
