@@ -13,11 +13,10 @@ import {
 export const getAllOrderControler = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string, 10) || 1
-    const limit = parseInt(req.query.limit as string, 10) || 10
     const status = req.query.status as string
     const search = req.query.search as string | undefined
 
-    const result = await getAllOrderService(page, limit, status, search)
+    const result = await getAllOrderService(page, status, search)
 
     return res.status(200).json({
       message: DEFAULT_MESSAGE.DEFAULT_SUCCESS,
