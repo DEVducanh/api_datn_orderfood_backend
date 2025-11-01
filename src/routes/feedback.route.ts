@@ -1,221 +1,192 @@
 import express from 'express'
+import { USER_ROLE } from '~/constants/enum'
 import {
   createFeedBackControler,
+  createFeedbackResponseController,
+  deleteFeedbackController,
   getAllFeedBackControler,
   getDetailFeedbackControler,
-  getFeedBackByDishIdControler
+  getFeedBackByDishIdControler,
+  getResponseDetailController,
+  getResponsesByFeedbackController,
+  updateFeedbackStatusController
 } from '~/controllers/feedback.controler'
+import { authMiddleware, roleMiddleware } from '~/middlewares/auth'
 
 const router = express.Router()
 
 /**
  * @swagger
- * tags:
- *   name: Feedback
- *   description: API quản lý Feedback (đánh giá, góp ý, khiếu nại món ăn)
- *
  * components:
  *   schemas:
  *     Feedback:
  *       type: object
- *       description: Mô hình dữ liệu của một feedback (đánh giá hoặc góp ý của người dùng)
+ *       description: Phản hồi của người dùng về món ăn
  *       properties:
  *         _id:
  *           type: string
- *           description: ID tự động sinh của feedback
- *           example: "67201ad9b76e2b1f9c56a91a"
+ *           description: ID của feedback
  *         user_id:
  *           type: string
- *           description: ID người dùng gửi feedback (tham chiếu đến bảng Users)
- *           example: "671fc9c2d9993b183f37b6f3"
+ *           description: ID người dùng gửi feedback
  *         order_id:
  *           type: string
- *           description: ID đơn hàng liên quan đến feedback (tham chiếu đến bảng Orders)
- *           example: "671fc9c2d9993b183f37b6f4"
+ *           description: ID của đơn hàng chứa món ăn được đánh giá
  *         dish_id:
  *           type: string
- *           description: ID món ăn được đánh giá (tham chiếu đến bảng Dishes)
- *           example: "671fc9c2d9993b183f37b6f5"
+ *           description: ID món ăn được đánh giá
  *         type:
  *           type: string
- *           enum: [normal, complaint, suggestion]
- *           description: Loại feedback — bình thường, khiếu nại hoặc góp ý
- *           example: "normal"
+ *           description: Loại phản hồi (positive, negative, neutral,...)
  *         rating:
  *           type: number
- *           description: Điểm đánh giá món ăn (1–5)
- *           minimum: 1
- *           maximum: 5
- *           example: 5
+ *           description: Số sao đánh giá (1–5)
  *         content:
  *           type: string
- *           description: Nội dung chi tiết của feedback
- *           example: "Món ăn rất ngon, phục vụ nhanh và nhiệt tình!"
+ *           description: Nội dung phản hồi
  *         image:
  *           type: string
- *           nullable: true
- *           description: Đường dẫn ảnh minh họa (nếu có)
- *           example: "https://example.com/uploads/feedback_001.jpg"
+ *           description: Đường dẫn hình ảnh minh họa nếu có
  *         status:
  *           type: string
- *           enum: [pending, approved, rejected]
- *           description: Trạng thái xử lý của feedback
- *           example: "pending"
- *         created_at:
+ *           description: Trạng thái phản hồi (pending, approved, rejected)
+ *         createdAt:
  *           type: string
  *           format: date-time
- *           description: Thời gian tạo feedback
- *           example: "2025-11-01T10:15:30.000Z"
- *         updated_at:
+ *           description: Thời gian tạo phản hồi
+ *
+ *     FeedbackResponse:
+ *       type: object
+ *       description: Phản hồi từ admin cho feedback của người dùng
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: ID của phản hồi
+ *         feedback_id:
+ *           type: string
+ *           description: ID của feedback được phản hồi
+ *         user_id:
+ *           type: string
+ *           description: ID của admin phản hồi
+ *         content:
+ *           type: string
+ *           description: Nội dung phản hồi của admin
+ *         createdAt:
  *           type: string
  *           format: date-time
- *           description: Thời gian cập nhật feedback
- *           example: "2025-11-01T10:15:30.000Z"
- */
-
-/**
- * @swagger
+ *           description: Thời gian tạo phản hồi
+ *
+ * tags:
+ *   - name: Feedback
+ *     description: Quản lý phản hồi và phản hồi của admin
+ *
  * /feedback:
  *   get:
  *     summary: Lấy danh sách tất cả feedback
- *     description: Trả về danh sách tất cả feedback trong hệ thống, bao gồm cả pending, approved và rejected.
  *     tags: [Feedback]
  *     responses:
  *       200:
- *         description: Lấy danh sách feedback thành công
+ *         description: Danh sách feedback
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Feedback'
- *       500:
- *         description: Lỗi server khi lấy danh sách feedback
- */
-
-/**
- * @swagger
- * /feedback/{id}:
- *   get:
- *     summary: Lấy chi tiết một feedback theo ID
- *     description: Trả về thông tin chi tiết của một feedback dựa vào ID.
- *     tags: [Feedback]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID của feedback cần xem chi tiết
- *     responses:
- *       200:
- *         description: Lấy thông tin feedback thành công
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Feedback'
- *       404:
- *         description: Không tìm thấy feedback
- *       500:
- *         description: Lỗi server khi lấy chi tiết feedback
- */
-
-/**
- * @swagger
- * /feedback/dish/{dish_id}:
- *   get:
- *     summary: Lấy danh sách feedback theo ID món ăn
- *     description: Trả về toàn bộ feedback của một món ăn cụ thể theo `dish_id`.
- *     tags: [Feedback]
- *     parameters:
- *       - in: path
- *         name: dish_id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID món ăn để lọc feedback
- *     responses:
- *       200:
- *         description: Lấy danh sách feedback theo món ăn thành công
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Feedback'
- *       404:
- *         description: Không có feedback nào cho món ăn này
- *       500:
- *         description: Lỗi server khi lấy feedback theo món
- */
-
-/**
- * @swagger
- * /feedback:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Feedback'
+ *
  *   post:
- *     summary: Tạo mới một feedback
- *     description: API cho phép người dùng tạo một feedback mới, bao gồm điểm đánh giá, nội dung và hình ảnh (tùy chọn).
+ *     summary: Tạo feedback mới
  *     tags: [Feedback]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required: [user_id, order_id, dish_id, type, rating, content]
- *             properties:
- *               user_id:
- *                 type: string
- *                 description: ID người dùng gửi feedback
- *                 example: "671fc9c2d9993b183f37b6f3"
- *               order_id:
- *                 type: string
- *                 description: ID đơn hàng liên quan đến feedback
- *                 example: "671fc9c2d9993b183f37b6f4"
- *               dish_id:
- *                 type: string
- *                 description: ID món ăn được đánh giá
- *                 example: "671fc9c2d9993b183f37b6f5"
- *               type:
- *                 type: string
- *                 enum: [normal, complaint, suggestion]
- *                 description: Loại feedback (bình thường, khiếu nại hoặc góp ý)
- *                 example: "normal"
- *               rating:
- *                 type: number
- *                 minimum: 1
- *                 maximum: 5
- *                 description: Điểm đánh giá món ăn (1–5)
- *                 example: 4
- *               content:
- *                 type: string
- *                 description: Nội dung đánh giá hoặc nhận xét của người dùng
- *                 example: "Món ăn ngon nhưng phục vụ hơi chậm."
- *               image:
- *                 type: string
- *                 nullable: true
- *                 description: Đường dẫn ảnh minh họa (tùy chọn)
- *                 example: "https://example.com/uploads/feedback_001.jpg"
- *               status:
- *                 type: string
- *                 enum: [pending, approved, rejected]
- *                 description: Trạng thái của feedback (mặc định là pending)
- *                 example: "pending"
+ *             $ref: '#/components/schemas/Feedback'
  *     responses:
  *       201:
- *         description: Tạo feedback thành công
+ *         description: Feedback được tạo thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Feedback'
+ *
+ * /feedback/{id}:
+ *   get:
+ *     summary: Lấy chi tiết một feedback theo ID(trang admin)
+ *     tags: [Feedback]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID của feedback cần xem
+ *     responses:
+ *       200:
+ *         description: Chi tiết feedback
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Feedback'
+ *   delete:
+ *     summary: Xóa feedback (chỉ dành cho admin)
+ *     description: |
+ *       Chỉ **Admin** có thể xóa feedback.
+ *       Feedback ở trạng thái **Pending** (chưa xử lý) sẽ không thể bị xóa.
+ *     tags: [Feedback]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của feedback cần xóa
+ *     responses:
+ *       200:
+ *         description: Feedback đã được xóa thành công
+ *       400:
+ *         description: Feedback chưa được xử lý hoặc không tồn tại
+ *       403:
+ *         description: Không đủ quyền hạn (chỉ admin được phép)
+ *       500:
+ *         description: Lỗi server
+ *
+ * /feedback/{id}/status:
+ *   patch:
+ *     summary: Cập nhật trạng thái của feedback hoặc khi admin phản hồi sẽ tự động cập nhật status
+ *     description: |
+ *       Admin có thể cập nhật trạng thái của feedback giữa ba trạng thái:
+ *       - **Pending** – Đang chờ xử lý
+ *       - **Resolved** – Đã xử lý xong
+ *       - **Rejected** – Đã từ chối
+ *     tags: [Feedback]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của feedback cần cập nhật
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [Pending, Resolved, Rejected]
+ *             example:
+ *               status: "Resolved"
+ *     responses:
+ *       200:
+ *         description: Cập nhật trạng thái thành công
  *         content:
  *           application/json:
  *             schema:
@@ -223,20 +194,126 @@ const router = express.Router()
  *               properties:
  *                 success:
  *                   type: boolean
- *                   example: true
  *                 message:
  *                   type: string
- *                   example: "Feedback created successfully"
  *                 data:
- *                   $ref: '#/components/schemas/Feedback'
+ *                   type: object
+ *                   description: Thông tin feedback sau khi cập nhật
  *       400:
- *         description: Dữ liệu đầu vào không hợp lệ
+ *         description: Feedback không tồn tại hoặc dữ liệu không hợp lệ
+ *       403:
+ *         description: Không đủ quyền hạn
  *       500:
- *         description: Lỗi server khi tạo feedback
+ *         description: Lỗi server
+ *
+ *
+ * /feedback/dish/{dish_id}:
+ *   get:
+ *     summary: Lấy tất cả feedback theo ID món ăn
+ *     tags: [Feedback]
+ *     parameters:
+ *       - in: path
+ *         name: dish_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID món ăn cần xem phản hồi
+ *     responses:
+ *       200:
+ *         description: Danh sách feedback của món ăn
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Feedback'
+ *
+ * /feedback/{feedback_id}/responses:
+ *   get:
+ *     summary: Lấy danh sách phản hồi từ admin của một feedback hiển thị ra client
+ *     tags: [Feedback]
+ *     parameters:
+ *       - in: path
+ *         name: feedback_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID của feedback cần lấy phản hồi
+ *     responses:
+ *       200:
+ *         description: Danh sách phản hồi của feedback
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/FeedbackResponse'
+ *
+ * /feedback/{feedback_id}/response:
+ *   post:
+ *     summary: Tạo phản hồi cho một feedback (chỉ admin)
+ *     tags: [Feedback]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: feedback_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID của feedback được phản hồi
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 description: Nội dung phản hồi của admin
+ *     responses:
+ *       201:
+ *         description: Phản hồi được tạo thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/FeedbackResponse'
+ *       403:
+ *         description: Không đủ quyền hạn (chỉ admin được phép)
+ *
+ * /feedback/response/{id}:
+ *   get:
+ *     summary: Xem chi tiết phản hồi theo ID
+ *     tags: [Feedback]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID của phản hồi cần xem chi tiết
+ *     responses:
+ *       200:
+ *         description: Chi tiết phản hồi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/FeedbackResponse'
  */
 
 router.get('/', getAllFeedBackControler)
 router.get('/:id', getDetailFeedbackControler)
+router.get('/:feedback_id/responses', getResponsesByFeedbackController)
+router.patch('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), updateFeedbackStatusController)
+router.post(
+  '/:feedback_id/response',
+  authMiddleware,
+  roleMiddleware([USER_ROLE.ADMIN]),
+  createFeedbackResponseController
+)
+router.delete('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), deleteFeedbackController)
+router.get('/response/:id', getResponseDetailController)
 router.get('/dish/:dish_id', getFeedBackByDishIdControler)
 router.post('/', createFeedBackControler)
 
