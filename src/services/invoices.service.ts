@@ -8,6 +8,8 @@ import OrderItem from '../models/order-item.model'
 export const getAllInvoiceService = async () => {
   try {
     const invoices = await Invoices.find()
+      .populate('user_id', 'username') // chỉ lấy field name từ user
+      .populate('table_id', 'table_name')
 
     if (!invoices || invoices.length === 0) {
       return {
