@@ -158,6 +158,8 @@ const router = express.Router()
  *     responses:
  *       200:
  *         description: Cập nhật trạng thái bàn thành công
+ *       400:
+ *         description: Lỗi cập nhật trạng thái bàn (ko tìm thấy bàn hoặc bàn đang có người ngồi)
  */
 
 router.get('/', getAllTableController)
