@@ -41,8 +41,8 @@ export const updateUserControler = async (req: Request, res: Response) => {
     const { id } = req.params
     const data = await UpdateUserService(id, req.body)
     res.status(201).json({ message: DEFAULT_MESSAGE.DEFAULT_SUCCESS, data })
-  } catch (error) {
-    return res.status(500).json({ message: DEFAULT_MESSAGE.DEFAULT_ERROR })
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message })
   }
 }
 
@@ -51,7 +51,7 @@ export const deleteUserControler = async (req: Request, res: Response) => {
     const { id } = req.params
     await deleteUserService(id)
     res.status(201).json({ message: DEFAULT_MESSAGE.DEFAULT_SUCCESS })
-  } catch (error) {
-    return res.status(500).json({ message: DEFAULT_MESSAGE.DEFAULT_ERROR })
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message })
   }
 }

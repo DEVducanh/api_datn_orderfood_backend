@@ -1,7 +1,7 @@
 import express from 'express'
 import {
   createOrderControler,
-  deleteOrderController,
+  deleteOrderControler,
   getAllOrderControler,
   getDetailOrderByTableIdController,
   updateOrderControler,
@@ -22,18 +22,6 @@ const router = express.Router()
  *     tags: [Orders]
  *     parameters:
  *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           example: 1
- *         description: Số trang
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           example: 10
- *         description: Giới hạn số đơn hàng mỗi trang
- *       - in: query
  *         name: status
  *         schema:
  *           type: string
@@ -43,8 +31,8 @@ const router = express.Router()
  *         name: search
  *         schema:
  *           type: string
- *           example: "Ban 1"
- *         description: Tìm kiếm theo tên bàn hoặc tên người dùng
+ *           example: Bàn 4 || ducanh1925
+ *         description: tìm kiếm đơn hàng
  *     responses:
  *       200:
  *         description: Lấy danh sách đơn hàng thành công
@@ -129,7 +117,7 @@ const router = express.Router()
  *         description: Không tìm thấy đơn hàng
  *
  *   delete:
- *     summary: Xóa đơn hàng
+ *     summary: Xóa đơn hàng theo ID
  *     tags: [Orders]
  *     parameters:
  *       - in: path
@@ -141,18 +129,8 @@ const router = express.Router()
  *     responses:
  *       200:
  *         description: Xóa đơn hàng thành công
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Đơn hàng đã được xóa thành công"
  *       404:
  *         description: Không tìm thấy đơn hàng
- *       500:
- *         description: Lỗi server
  *
  * /orders/{id}/status:
  *   patch:
@@ -188,7 +166,7 @@ router.get('/', getAllOrderControler)
 router.get('/:tableId', getDetailOrderByTableIdController)
 router.post('/', createOrderControler)
 router.patch('/:id', updateOrderControler)
-router.delete('/:id', deleteOrderController)
+router.delete('/:id', deleteOrderControler)
 router.patch('/:id/status', updateOrderStatusController)
 
 export default router

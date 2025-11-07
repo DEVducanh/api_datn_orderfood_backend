@@ -24,10 +24,48 @@ export enum TABLE_STATUS {
 }
 
 export enum ORDER_STATUS {
-  PENDING = 'pending',
-  IN_PROGRESS = 'in_progress',
-  READY = 'ready',
-  SERVED = 'served',
+  PENDING = 'Pending',
+  PROCESSING = 'Processing',
+  READY = 'Ready',
+  SERVED = 'Served',
+  CANCELED = 'Cancelled',
+  COMPLETED = 'Completed'
+}
+
+export enum ORDER_ITEM_STATUS {
+  PENDING = 'Pending',
+  PROCESSING = 'Processing',
+  READY = 'Ready',
+  SERVED = 'Served',
+  CANCELED = 'Cancelled'
+}
+
+export enum TYPE_FEEDBACK {
+  DISHES = 'Dish',
+  SERVICE = 'Service',
+  APP = 'App'
+}
+
+export enum STATUS_FEEDBACK {
+  PENDING = 'Pending', //đang chờ giải quyết
+  RESOLVED = 'Resolved', //đã giải quyết
+  REJECTED = 'Rejected'
+}
+
+export enum STATUS_INVOICES {
+  UNPAID = 'unpaid',
+  PAID = 'paid',
   CANCELED = 'canceled',
-  COMPLETED = 'completed'
+  MERGED = 'merged'
+}
+
+export enum STATUS_PAYMENTS {
+  SUCCESS = 'Success',
+  FAILED = 'Failed',
+  REFUNDED = 'Refunded'
+}
+
+export enum PAYMENT_METHOD {
+  CASH = 'Cash',
+  BANK = 'Bank_Transfer'
 }

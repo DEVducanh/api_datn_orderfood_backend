@@ -13,6 +13,7 @@ export const OrderSchema = new mongoose.Schema<IOrder>(
       required: true,
       default: ORDER_STATUS.PENDING
     },
+    total_price: { type: Number, required: true, default: 0 },
     createdAt: {
       type: String,
       default: () => dayjs().format('YYYY-MM-DD HH:mm:ss')
