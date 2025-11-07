@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import e, { Request, Response } from 'express'
 import { DEFAULT_MESSAGE } from '~/constants/message'
 import {
   createTableService,
@@ -46,8 +46,8 @@ export const updateTableStatusController = async (req: Request, res: Response) =
     const { status } = req.body
     const data = await updateStatusTableService(id, status)
     return res.status(200).json({ success: DEFAULT_MESSAGE.DEFAULT_SUCCESS, data })
-  } catch (error) {
-    return res.status(400).json({ message: DEFAULT_MESSAGE.DEFAULT_ERROR })
+  } catch (error: any) {
+    return res.status(400).json({ message: error.message || DEFAULT_MESSAGE.DEFAULT_ERROR })
   }
 }
 
