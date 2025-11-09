@@ -11,7 +11,7 @@ const router = express.Router()
  * @swagger
  * tags:
  *   name: Invoices
- *   description: API quản lý hóa đơn
+ *   description: API quản lý hóa đơn, thanh toán và giao dịch
  */
 
 /**
@@ -30,6 +30,7 @@ const router = express.Router()
  *               properties:
  *                 success:
  *                   type: boolean
+ *                   example: true
  *                 data:
  *                   type: array
  *                   items:
@@ -37,16 +38,25 @@ const router = express.Router()
  *                     properties:
  *                       _id:
  *                         type: string
+ *                         example: 6757a83b9f4b1e0a34f7b012
  *                       order_id:
  *                         type: string
+ *                         example: 6757a83b9f4b1e0a34f7b045
  *                       user_id:
  *                         type: string
+ *                         example: 6757a83b9f4b1e0a34f7b099
  *                       table_id:
  *                         type: string
+ *                         example: 6757a83b9f4b1e0a34f7b0aa
  *                       total_amount:
  *                         type: number
+ *                         example: 500000
  *                       status:
  *                         type: string
+ *                         example: paid
+ *                       created_at:
+ *                         type: string
+ *                         format: date-time
  *       500:
  *         description: Lỗi server hoặc lỗi cơ sở dữ liệu
  *         content:
@@ -64,7 +74,7 @@ const router = express.Router()
  * @swagger
  * /invoices/{id}:
  *   get:
- *     summary: Lấy chi tiết một hóa đơn
+ *     summary: Lấy chi tiết một hóa đơn bao gồm thông tin thanh toán và giao dịch
  *     tags: [Invoices]
  *     parameters:
  *       - in: path
@@ -75,7 +85,7 @@ const router = express.Router()
  *         description: ID của hóa đơn cần xem chi tiết
  *     responses:
  *       200:
- *         description: Trả về chi tiết hóa đơn
+ *         description: Trả về chi tiết hóa đơn thành công
  *         content:
  *           application/json:
  *             schema:
@@ -83,17 +93,76 @@ const router = express.Router()
  *               properties:
  *                 success:
  *                   type: boolean
+ *                   example: true
  *                 data:
  *                   type: object
  *                   properties:
  *                     _id:
  *                       type: string
+ *                       example: 6757a83b9f4b1e0a34f7b012
  *                     order_id:
  *                       type: string
+ *                       example: 6757a83b9f4b1e0a34f7b045
  *                     total_amount:
  *                       type: number
+ *                       example: 500000
  *                     status:
  *                       type: string
+ *                       example: paid
+ *                     created_at:
+ *                       type: string
+ *                       format: date-time
+ *                     updated_at:
+ *                       type: string
+ *                       format: date-time
+ *                     user:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         name:
+ *                           type: string
+ *                         email:
+ *                           type: string
+ *                     table:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         name:
+ *                           type: string
+ *                     payment:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         method:
+ *                           type: string
+ *                           example: Cash
+ *                         amount_paid:
+ *                           type: number
+ *                           example: 500000
+ *                         status:
+ *                           type: string
+ *                           example: Success
+ *                     transaction:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         type:
+ *                           type: string
+ *                           example: Cash
+ *                         amount_paid:
+ *                           type: number
+ *                         status:
+ *                           type: string
+ *                           example: Completed
+ *                         created_at:
+ *                           type: string
+ *                           format: date-time
  *       404:
  *         description: Không tìm thấy hóa đơn
  *         content:
@@ -103,17 +172,18 @@ const router = express.Router()
  *               properties:
  *                 success:
  *                   type: boolean
+ *                   example: false
  *                 message:
  *                   type: string
  *       500:
- *         description: Lỗi server
+ *         description: Lỗi server hoặc lỗi cơ sở dữ liệu
  */
 
 /**
  * @swagger
  * /invoices:
  *   post:
- *     summary: Tạo hóa đơn mới từ đơn hàng
+ *     summary: Tạo hóa đơn mới từ đơn hàng và khởi tạo thanh toán (Cash hoặc VnPay)
  *     tags: [Invoices]
  *     requestBody:
  *       required: true
@@ -121,13 +191,22 @@ const router = express.Router()
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - order_id
+ *               - method
  *             properties:
  *               order_id:
  *                 type: string
  *                 description: ID của đơn hàng
+ *                 example: 6757a83b9f4b1e0a34f7b045
+ *               method:
+ *                 type: string
+ *                 description: Phương thức thanh toán
+ *                 enum: [Cash, VnPay]
+ *                 example: Cash
  *     responses:
  *       201:
- *         description: Tạo hóa đơn thành công
+ *         description: Tạo hóa đơn và thanh toán thành công
  *         content:
  *           application/json:
  *             schema:
@@ -140,16 +219,14 @@ const router = express.Router()
  *                 data:
  *                   type: object
  *                   properties:
- *                     _id:
+ *                     invoice_id:
  *                       type: string
- *                     order_id:
+ *                     payment_id:
  *                       type: string
- *                     total_amount:
- *                       type: number
- *                     status:
+ *                     transaction_id:
  *                       type: string
  *       400:
- *         description: Lỗi dữ liệu đầu vào (ví dụ order không tồn tại)
+ *         description: Dữ liệu đầu vào không hợp lệ (ví dụ order không tồn tại hoặc chưa hoàn thành)
  *         content:
  *           application/json:
  *             schema:
@@ -157,10 +234,11 @@ const router = express.Router()
  *               properties:
  *                 success:
  *                   type: boolean
+ *                   example: false
  *                 message:
  *                   type: string
  *       500:
- *         description: Lỗi server
+ *         description: Lỗi server hoặc lỗi xử lý logic
  */
 
 router.get('/', getAllInvoiceController)

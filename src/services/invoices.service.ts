@@ -1,9 +1,11 @@
-import { ORDER_STATUS, STATUS_INVOICES } from '~/constants/enum'
+import { ORDER_STATUS, PAYMENT_METHOD, STATUS_INVOICES, STATUS_PAYMENTS } from '~/constants/enum'
 import Invoices from '../models/invoices.model'
 import Order from '../models/order.model'
 import User from '../models/user.model'
 import Table from '../models/table.model'
 import OrderItem from '../models/order-item.model'
+import Payments from '../models/payment.model'
+import Transactions from '../models/transaction.model'
 
 export const getAllInvoiceService = async () => {
   try {
@@ -50,6 +52,13 @@ export const getDetailInvoicesService = async (id: string) => {
     const user = invoice.user_id ? await User.findById(invoice.user_id) : null
     const table = invoice.table_id ? await Table.findById(invoice.table_id) : null
 
+    const payment = await Payments.findOne({ invoice_id: invoice._id })
+
+    let transaction = null
+    if (payment?._id) {
+      transaction = await Transactions.findOne({ payment_id: payment._id })
+    }
+
     const invoiceDetail = {
       _id: invoice._id,
       order_id: invoice.order_id,
@@ -59,7 +68,26 @@ export const getDetailInvoicesService = async (id: string) => {
       status: invoice.status,
       created_at: invoice.created_at,
       updated_at: invoice.updated_at,
-      order_item: order_item
+      order_item: order_item,
+
+      payment: payment
+        ? {
+            id: payment._id,
+            method: payment.method,
+            status: payment.status,
+            amount_paid: payment.amount_paid
+          }
+        : null,
+
+      transaction: transaction
+        ? {
+            id: transaction._id,
+            status: transaction.status,
+            type: transaction.type,
+            amount_paid: transaction.amount_paid,
+            created_at: transaction.create_at
+          }
+        : null
     }
 
     return {
@@ -75,21 +103,21 @@ export const getDetailInvoicesService = async (id: string) => {
   }
 }
 
-export const createInvoiceService = async (payload: { order_id: string }) => {
+export const createInvoiceService = async (payload: { order_id: string; method?: string }) => {
   try {
     const order = await Order.findById(payload.order_id)
-    console.log(order)
 
     if (!order) {
       return {
         success: false,
-        message: 'Order not found'
+        message: 'Order Không tìm thấy'
       }
     }
+
     if (order.status !== ORDER_STATUS.COMPLETED) {
       return {
         success: false,
-        message: 'Invoice can only be created when the order is completed'
+        message: 'Invoice chỉ có thể tạo khi đơn hàng ở trạng thái COMPLETED'
       }
     }
 
@@ -107,18 +135,52 @@ export const createInvoiceService = async (payload: { order_id: string }) => {
       created_at: new Date(),
       updated_at: new Date()
     })
-
     const savedInvoice = await newInvoice.save()
+
+    const isCash = payload.method === PAYMENT_METHOD.CASH
+
+    const newPayment = new Payments({
+      invoice_id: savedInvoice._id,
+      method: payload.method || PAYMENT_METHOD.CASH,
+      amount_paid: order.total_price,
+      status: isCash ? STATUS_PAYMENTS.SUCCESS : STATUS_PAYMENTS.FAILED,
+      created_at: new Date()
+    })
+    const savedPayment = await newPayment.save()
+
+    if (isCash) {
+      savedInvoice.status = STATUS_INVOICES.PAID
+      await savedInvoice.save()
+    }
+
+    const newTransaction = new Transactions({
+      payment_id: savedPayment._id,
+      user_id: order.user_id,
+      invoices_id: savedInvoice._id,
+      type: payload.method || 'Cash',
+      amount_paid: order.total_price,
+      status: isCash ? 'Completed' : 'Canceled',
+      create_at: new Date()
+    })
+    const savedTransaction = await newTransaction.save()
+
+    savedPayment.transaction_id = savedTransaction._id
+    await savedPayment.save()
 
     return {
       success: true,
-      message: 'Invoice created successfully',
-      data: savedInvoice
+      message: 'Invoice, payment, and transaction created successfully',
+      data: {
+        invoice: savedInvoice,
+        payment: savedPayment,
+        transaction: savedTransaction
+      }
     }
   } catch (error: any) {
+    console.error('Error creating invoice service:', error)
     return {
       success: false,
-      message: error.message || 'Error Get Invoices'
+      message: error.message || 'Error creating invoice'
     }
   }
 }

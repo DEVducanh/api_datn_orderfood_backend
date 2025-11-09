@@ -67,5 +67,5 @@ export enum STATUS_PAYMENTS {
 
 export enum PAYMENT_METHOD {
   CASH = 'Cash',
-  BANK = 'Bank_Transfer'
+  VNPAY = 'VnPay'
 }
