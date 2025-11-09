@@ -43,26 +43,34 @@ export const getDetailInvoiceControler = async (req: Request, res: Response) => 
 
 export const createInvoiceController = async (req: Request, res: Response) => {
   try {
-    const { order_id } = req.body
+    const { order_id, method } = req.body
 
     if (!order_id) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields'
+        message: 'Missing required field: order_id'
       })
     }
 
     const result = await createInvoiceService({
-      order_id
+      order_id,
+      method
     })
 
     if (!result.success) {
+      if (result.message.includes('Completed') || result.message.includes('exists')) {
+        return res.status(409).json(result)
+      }
       return res.status(500).json(result)
     }
 
-    return res.status(201).json(result)
+    return res.status(200).json({
+      success: true,
+      message: 'Invoice, payment, and transaction created successfully',
+      data: result.data
+    })
   } catch (error: any) {
-    console.error(error)
+    console.error('Error in createInvoiceController:', error)
     return res.status(500).json({
       success: false,
       message: error.message || 'Error creating invoice'
