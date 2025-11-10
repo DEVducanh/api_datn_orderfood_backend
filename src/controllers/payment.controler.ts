@@ -3,6 +3,8 @@ import qs from 'query-string'
 import crypto from 'crypto'
 import moment from 'moment'
 import { updateInvoicePayment } from '~/services/invoices.service'
+import Invoices from '../models/invoices.model'
+import { STATUS_INVOICES, STATUS_PAYMENTS } from '~/constants/enum'
 
 function sortObject(obj: any) {
   let sorted: Record<string, any> = {}
@@ -37,7 +39,8 @@ export const createPaymentUrl = (req: Request, res: Response, next: NextFunction
     let secretKey: string = process.env.vnp_HashSecret!
     let vnpUrl: string = process.env.vnp_Url!
     let returnUrl: string = process.env.vnp_ReturnUrl!
-    let orderId = req.body.order_id
+
+    let invoicesId = req.body.invoicesId
     let amount: number = req.body.amount
     let bankCode: string = req.body.bankCode
 
@@ -53,8 +56,8 @@ export const createPaymentUrl = (req: Request, res: Response, next: NextFunction
     vnp_Params['vnp_TmnCode'] = tmnCode
     vnp_Params['vnp_Locale'] = locale
     vnp_Params['vnp_CurrCode'] = currCode
-    vnp_Params['vnp_TxnRef'] = orderId
-    vnp_Params['vnp_OrderInfo'] = 'Thanh toan cho ma GD:' + orderId
+    vnp_Params['vnp_TxnRef'] = invoicesId
+    vnp_Params['vnp_OrderInfo'] = 'Thanh toan cho ma GD:' + invoicesId
     vnp_Params['vnp_OrderType'] = 'other'
     vnp_Params['vnp_Amount'] = amount * 100
     vnp_Params['vnp_ReturnUrl'] = returnUrl
@@ -84,7 +87,6 @@ export const createPaymentUrl = (req: Request, res: Response, next: NextFunction
 export const vnpayReturn = (req: Request, res: Response, next: NextFunction): void => {
   try {
     let vnp_Params = req.query
-
     let secureHash = vnp_Params['vnp_SecureHash']
 
     delete vnp_Params['vnp_SecureHash']
@@ -101,6 +103,7 @@ export const vnpayReturn = (req: Request, res: Response, next: NextFunction): vo
     let signed = hmac.update(new Buffer(signData, 'utf-8')).digest('hex')
 
     if (secureHash === signed) {
+      updateInvoicePayment(vnp_Params['vnp_TxnRef'], 'VnPay')
       res.render('success', { code: vnp_Params['vnp_ResponseCode'] })
     } else {
       res.render('success', { code: '97' })
@@ -115,7 +118,7 @@ export const vnpIpn = async (req: Request, res: Response, next: NextFunction) =>
     let vnp_Params = req.query
     let secureHash = vnp_Params['vnp_SecureHash']
 
-    let orderId = vnp_Params['vnp_TxnRef']
+    let invoicesId = vnp_Params['vnp_TxnRef']
     let rspCode = vnp_Params['vnp_ResponseCode']
 
     delete vnp_Params['vnp_SecureHash']
@@ -128,16 +131,20 @@ export const vnpIpn = async (req: Request, res: Response, next: NextFunction) =>
 
     let hmac = crypto.createHmac('sha512', secretKey)
     let signed = hmac.update(new Buffer(signData, 'utf-8')).digest('hex')
-    let paymentStatus = '0'
 
-    let checkOrderId = true // Mã đơn hàng "giá trị của vnp_TxnRef" VNPAY phản hồi tồn tại trong CSDL của bạn
-    let checkAmount = true // Kiểm tra số tiền "giá trị của vnp_Amout/100" trùng khớp với số tiền của đơn hàng trong CSDL của bạn
+    console.log('Invoice ID from VNPay:', invoicesId)
+    const invoice = await Invoices.findById(invoicesId)
+
+    let paymentStatus = STATUS_INVOICES.UNPAID
+
+    let checkInvoiceId = invoicesId === invoice?._id.toString()
+    let checkAmount = vnp_Params['vnp_Amount'] == invoice?.total_amount
     if (secureHash === signed) {
-      if (checkOrderId) {
+      if (checkInvoiceId) {
         if (checkAmount) {
-          if (paymentStatus == '0') {
+          if (paymentStatus == STATUS_INVOICES.UNPAID) {
             if (rspCode == '00') {
-              const result = await updateInvoicePayment(orderId!, 'VNPAY')
+              await updateInvoicePayment(invoicesId, 'VnPay')
               res.status(200).json({ RspCode: '00', Message: 'Success' })
             } else {
               res.status(200).json({ RspCode: '00', Message: 'Success' })
@@ -154,5 +161,6 @@ export const vnpIpn = async (req: Request, res: Response, next: NextFunction) =>
     } else {
       res.status(200).json({ RspCode: '97', Message: 'Checksum failed' })
     }
+    return res.status(200).json({ RspCode: '00', Message: 'Payment failed' })
   } catch (error) {}
 }

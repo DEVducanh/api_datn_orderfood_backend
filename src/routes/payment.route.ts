@@ -86,8 +86,73 @@ const router = express.Router()
  *                   example: "Lỗi tạo URL thanh toán"
  */
 
+/**
+ * @swagger
+ * /vnpay-return:
+ *   post:
+ *     summary: Xử lý callback trả về từ VNPay (vnreturn)
+ *     tags: [Payments]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             description: Dữ liệu callback từ VNPay
+ *             example:
+ *               vnp_Amount: "5000000"
+ *               vnp_BankCode: "VNPAYQR"
+ *               vnp_BankTranNo: "20251111001"
+ *               vnp_CardType: "ATM"
+ *               vnp_OrderInfo: "Thanh toán đơn hàng #123"
+ *               vnp_PayDate: "20251111120000"
+ *               vnp_ResponseCode: "00"
+ *               vnp_TransactionNo: "123456789"
+ *               vnp_SecureHash: "abcdef1234567890"
+ *     responses:
+ *       200:
+ *         description: Kết quả xác nhận thanh toán VNPay
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Thanh toán thành công"
+ *       400:
+ *         description: Dữ liệu callback không hợp lệ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Dữ liệu callback không hợp lệ"
+ *       500:
+ *         description: Lỗi server khi xử lý callback
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Lỗi xử lý callback VNPay"
+ */
+
 router.post('/create-payment', createPaymentUrl)
-router.get('/vnpay-return', vnpayReturn)
+router.post('/vnpay-return', vnpayReturn)
 router.get('/vnpay_ipn', vnpIpn)
 
 export default router

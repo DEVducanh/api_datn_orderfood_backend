@@ -38,19 +38,14 @@ const router = express.Router()
  *                     properties:
  *                       _id:
  *                         type: string
- *                         example: 6757a83b9f4b1e0a34f7b012
  *                       order_id:
  *                         type: string
- *                         example: 6757a83b9f4b1e0a34f7b045
  *                       user_id:
  *                         type: string
- *                         example: 6757a83b9f4b1e0a34f7b099
  *                       table_id:
  *                         type: string
- *                         example: 6757a83b9f4b1e0a34f7b0aa
  *                       total_amount:
  *                         type: number
- *                         example: 500000
  *                       status:
  *                         type: string
  *                         example: paid
@@ -99,13 +94,10 @@ const router = express.Router()
  *                   properties:
  *                     _id:
  *                       type: string
- *                       example: 6757a83b9f4b1e0a34f7b012
  *                     order_id:
  *                       type: string
- *                       example: 6757a83b9f4b1e0a34f7b045
  *                     total_amount:
  *                       type: number
- *                       example: 500000
  *                     status:
  *                       type: string
  *                       example: paid
@@ -192,18 +184,16 @@ const router = express.Router()
  *           schema:
  *             type: object
  *             required:
- *               - order_id
+ *               - invoices_id
  *               - method
  *             properties:
- *               order_id:
+ *               invoices_id:
  *                 type: string
- *                 description: ID của đơn hàng
- *                 example: 6757a83b9f4b1e0a34f7b045
+ *                 description: ID của hóa đơn
  *               method:
  *                 type: string
  *                 description: Phương thức thanh toán
  *                 enum: [Cash, VnPay]
- *                 example: Cash
  *     responses:
  *       201:
  *         description: Tạo hóa đơn và thanh toán thành công

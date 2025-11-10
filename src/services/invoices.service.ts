@@ -159,7 +159,7 @@ export const createInvoiceService = async (payload: { order_id: string; method?:
       invoices_id: savedInvoice._id,
       type: payload.method || 'Cash',
       amount_paid: order.total_price,
-      status: isCash ? 'Completed' : 'Canceled',
+      status: isCash ? 'Completed' : 'Cancelled',
       create_at: new Date()
     })
     const savedTransaction = await newTransaction.save()
@@ -185,8 +185,10 @@ export const createInvoiceService = async (payload: { order_id: string; method?:
   }
 }
 
-export const updateInvoicePayment = async (order_id: any, method: string) => {
-  const invoice = await Invoices.findOne({ order_id })
+export const updateInvoicePayment = async (invoicesId: any, method: string) => {
+  console.log(invoicesId)
+
+  const invoice = await Invoices.findById(invoicesId)
   if (!invoice) {
     return { success: false, message: 'Invoice không tồn tại' }
   }
