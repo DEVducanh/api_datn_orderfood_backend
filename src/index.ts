@@ -9,7 +9,8 @@ import dishesRouter from './routes/dish.route'
 import tableRouter from './routes/table.route'
 import orderRouter from './routes/order.route'
 import orderItemRouter from './routes/order-item.route'
-import invoices from './routes/invoice.route'
+import invoicesRouter from './routes/invoice.route'
+import paymentRouter from './routes/payment.route'
 import cartRouter from './routes/cart.route'
 import feedbackRouter from './routes/feedback.route'
 
@@ -69,7 +70,8 @@ app.use('/category', cateRouter)
 app.use('/tables', tableRouter)
 app.use('/orders', orderRouter)
 app.use('/order-item', orderItemRouter)
-app.use('/invoices', invoices)
+app.use('/invoices', invoicesRouter)
+app.use('/payment', paymentRouter)
 app.use('/cart', cartRouter)
 app.use('/feedback', feedbackRouter)
 

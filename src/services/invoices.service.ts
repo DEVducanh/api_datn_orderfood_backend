@@ -184,3 +184,50 @@ export const createInvoiceService = async (payload: { order_id: string; method?:
     }
   }
 }
+
+export const updateInvoicePayment = async (order_id: any, method: string) => {
+  const invoice = await Invoices.findOne({ order_id })
+  if (!invoice) {
+    return { success: false, message: 'Invoice không tồn tại' }
+  }
+
+  let payment = await Payments.findOne({ invoice_id: invoice._id })
+  if (!payment) {
+    payment = new Payments({
+      invoice_id: invoice._id,
+      method: method,
+      amount_paid: invoice.total_amount,
+      status: STATUS_PAYMENTS.SUCCESS,
+      created_at: new Date()
+    })
+    await payment.save()
+  } else {
+    payment.status = STATUS_PAYMENTS.SUCCESS
+    payment.method = method
+    await payment.save()
+  }
+
+  invoice.status = STATUS_INVOICES.PAID
+  await invoice.save()
+
+  // Tạo transaction
+  const transaction = new Transactions({
+    payment_id: payment._id,
+    user_id: invoice.user_id,
+    invoices_id: invoice._id,
+    type: method,
+    amount_paid: invoice.total_amount,
+    status: 'Completed',
+    create_at: new Date()
+  })
+  await transaction.save()
+
+  payment.transaction_id = transaction._id
+  await payment.save()
+
+  return {
+    success: true,
+    message: 'Invoice, payment và transaction đã cập nhật thành công',
+    data: { invoice, payment, transaction }
+  }
+}
