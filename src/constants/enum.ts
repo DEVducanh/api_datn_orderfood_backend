@@ -60,6 +60,7 @@ export enum STATUS_INVOICES {
 }
 
 export enum STATUS_PAYMENTS {
+  PENDING = 'Pending',
   SUCCESS = 'Success',
   FAILED = 'Failed',
   REFUNDED = 'Refunded'
