@@ -3,13 +3,7 @@ import Dish from '../models/dish.model'
 import { IUser } from '~/interfaces/user.type'
 import mongoose from 'mongoose'
 
-export const getAllDishService = async (
-  search?: string,
-  status?: string,
-  categoryId?: string,
-  page: number = 1,
-  limit: number = 10
-) => {
+export const getAllDishService = async (search?: string, status?: string, categoryId?: string, page: number = 1) => {
   try {
     const query: any = {}
     if (search) {
@@ -25,10 +19,9 @@ export const getAllDishService = async (
     if (categoryId) {
       query.category_id = new mongoose.Types.ObjectId(categoryId)
     }
-    const skip = (page - 1) * limit
 
     const [data, total] = await Promise.all([
-      Dish.find(query).populate('category_id', 'category_name').skip(skip).limit(limit),
+      Dish.find(query).populate('category_id', 'category_name'),
       Dish.countDocuments(query)
     ])
 
@@ -36,8 +29,7 @@ export const getAllDishService = async (
       data,
       pagination: {
         total,
-        page,
-        pages: Math.ceil(total / limit)
+        page
       }
     }
   } catch (error) {
