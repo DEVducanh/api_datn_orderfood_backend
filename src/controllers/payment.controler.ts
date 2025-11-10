@@ -75,7 +75,7 @@ export const createPaymentUrl = (req: Request, res: Response, next: NextFunction
 
     console.log(vnpUrl)
 
-    return res.redirect(vnpUrl)
+    res.status(200).json({ success: true, vnpUrl })
   } catch (error) {
     next(error)
   }
@@ -137,9 +137,6 @@ export const vnpIpn = async (req: Request, res: Response, next: NextFunction) =>
         if (checkAmount) {
           if (paymentStatus == '0') {
             if (rspCode == '00') {
-              //thanh cong
-              //paymentStatus = '1'
-              // Ở đây cập nhật trạng thái giao dịch thanh toán thành công vào CSDL của bạn
               const result = await updateInvoicePayment(orderId!, 'VNPAY')
               res.status(200).json({ RspCode: '00', Message: 'Success' })
             } else {
