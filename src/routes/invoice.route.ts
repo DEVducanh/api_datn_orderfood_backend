@@ -2,7 +2,8 @@ import express from 'express'
 import {
   createInvoiceController,
   getAllInvoiceController,
-  getDetailInvoiceControler
+  getDetailInvoiceControler,
+  getInvoiceByOrderId
 } from '~/controllers/invoices.controler'
 
 const router = express.Router()
@@ -231,8 +232,113 @@ const router = express.Router()
  *         description: Lỗi server hoặc lỗi xử lý logic
  */
 
+/**
+ * @swagger
+ * /invoices/by-order/{orderId}:
+ *   get:
+ *     summary: Lấy chi tiết hóa đơn theo order ID
+ *     tags: [Invoices]
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của order
+ *     responses:
+ *       200:
+ *         description: Lấy hóa đơn thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Get invoice detail successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     order_id:
+ *                       type: string
+ *                     user:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         name:
+ *                           type: string
+ *                         email:
+ *                           type: string
+ *                     table:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         name:
+ *                           type: string
+ *                     total_amount:
+ *                       type: number
+ *                     status:
+ *                       type: string
+ *                     created_at:
+ *                       type: string
+ *                     updated_at:
+ *                       type: string
+ *                     order_item:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                     payment:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         method:
+ *                           type: string
+ *                         status:
+ *                           type: string
+ *                         amount_paid:
+ *                           type: number
+ *                     transaction:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         status:
+ *                           type: string
+ *                         type:
+ *                           type: string
+ *                         amount_paid:
+ *                           type: number
+ *                         created_at:
+ *                           type: string
+ *       404:
+ *         description: Hóa đơn không tồn tại
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invoice not found for this order"
+ */
 router.get('/', getAllInvoiceController)
 router.get('/:id', getDetailInvoiceControler)
 router.post('/', createInvoiceController)
+router.get('/by-order/:orderId', getInvoiceByOrderId)
 
 export default router

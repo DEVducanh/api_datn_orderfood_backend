@@ -233,3 +233,67 @@ export const updateInvoicePayment = async (invoicesId: any, method: string) => {
     data: { invoice, payment, transaction }
   }
 }
+
+export const getInvoiceByOrderIdService = async (order_id: string) => {
+  try {
+    const invoice = await Invoices.findOne({ order_id })
+    if (!invoice) {
+      return {
+        success: false,
+        message: 'Invoice not found for this order'
+      }
+    }
+
+    const order = await Order.findById(invoice.order_id)
+    const user = invoice.user_id ? await User.findById(invoice.user_id) : null
+    const table = invoice.table_id ? await Table.findById(invoice.table_id) : null
+    const payment = await Payments.findOne({ invoice_id: invoice._id })
+
+    let transaction = null
+    if (payment?._id) {
+      transaction = await Transactions.findOne({ payment_id: payment._id })
+    }
+
+    // Build detail object
+    const invoiceDetail = {
+      _id: invoice._id,
+      order_id: invoice.order_id,
+      user: user ? { id: user._id, name: user.username, email: user.email } : null,
+      table: table ? { id: table._id, name: table.table_name } : null,
+      total_amount: invoice.total_amount,
+      status: invoice.status,
+      created_at: invoice.created_at,
+      updated_at: invoice.updated_at,
+
+      payment: payment
+        ? {
+            id: payment._id,
+            method: payment.method,
+            status: payment.status,
+            amount_paid: payment.amount_paid
+          }
+        : null,
+
+      transaction: transaction
+        ? {
+            id: transaction._id,
+            status: transaction.status,
+            type: transaction.type,
+            amount_paid: transaction.amount_paid,
+            created_at: transaction.create_at
+          }
+        : null
+    }
+
+    return {
+      success: true,
+      message: 'Get invoice detail successfully',
+      data: invoiceDetail
+    }
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || 'Error getting invoice'
+    }
+  }
+}

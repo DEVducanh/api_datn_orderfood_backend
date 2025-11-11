@@ -42,7 +42,6 @@ export const createPaymentUrl = async (req: Request, res: Response, next: NextFu
     }
 
     const exitingInvoied = await getDetailInvoicesService(invoicesId)
-    console.log('exit', exitingInvoied)
 
     if (exitingInvoied.data?.status == 'paid') {
       return res.status(400).json({ message: 'Hóa đơn đã được thanh toán' })
@@ -104,8 +103,6 @@ export const createPaymentUrl = async (req: Request, res: Response, next: NextFu
 
 export const vnpayReturn = (req: Request, res: Response, next: NextFunction) => {
   try {
-    console.log('vao day')
-
     let vnp_Params = { ...req.query }
     let secureHash = vnp_Params['vnp_SecureHash']
 
@@ -123,10 +120,6 @@ export const vnpayReturn = (req: Request, res: Response, next: NextFunction) => 
     let crypto = require('crypto')
     let hmac = crypto.createHmac('sha512', secretKey)
     let signed = hmac.update(new Buffer(signData, 'utf-8')).digest('hex')
-
-    console.log('secushhash', secureHash)
-    console.log('signed', signed)
-
     if (secureHash === signed) {
       updateInvoicePayment(vnp_Params['vnp_TxnRef'], 'VnPay')
       res.json({ code: vnp_Params['vnp_ResponseCode'] })
@@ -134,7 +127,6 @@ export const vnpayReturn = (req: Request, res: Response, next: NextFunction) => 
       res.json({ code: '97' })
     }
   } catch (error: any) {
-    console.log(error)
     return res.status(400).json({ message: error.message })
   }
 }
