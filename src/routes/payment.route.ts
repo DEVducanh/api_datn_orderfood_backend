@@ -12,7 +12,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /create-payment:
+ * payment/create-payment:
  *   post:
  *     summary: Tạo URL thanh toán VNPay
  *     tags: [Payments]
@@ -88,7 +88,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /vnpay-return:
+ * payment/vnpay-return:
  *   get:
  *     summary: Xử lý callback trả về từ VNPay (vnreturn)
  *     tags: [Payments]
