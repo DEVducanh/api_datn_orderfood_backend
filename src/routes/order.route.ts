@@ -152,7 +152,6 @@ const router = express.Router()
  *             properties:
  *               status:
  *                 type: string
- *                 example: "COMPLETED"
  *     responses:
  *       200:
  *         description: Cập nhật trạng thái thành công

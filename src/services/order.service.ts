@@ -2,6 +2,8 @@ import { IOrder } from '~/interfaces/order.type'
 import Order from '../models/order.model'
 import OrderItem from '../models/order-item.model'
 import { ORDER_ITEM_STATUS, ORDER_STATUS } from '~/constants/enum'
+import mongoose from 'mongoose'
+import orderItemModel from '../models/order-item.model'
 
 export const buildOrderPipeline = (dbQuery: any, dbSort: any, search?: string) => {
   const pipeline: any[] = []
@@ -105,30 +107,30 @@ export const updateOrderService = async (id: string, data: IOrder) => {
 }
 
 export const updateOrderStatusService = async (id: string, status: string) => {
-  const session = await Order.startSession()
-  session.startTransaction()
   try {
-    const updatedOrder = await Order.findByIdAndUpdate(id, { status, updatedAt: new Date() }, { new: true, session })
+    const updatedOrder = await Order.findByIdAndUpdate(id, { status, updatedAt: new Date() }, { new: true })
 
-    if (!updatedOrder) throw new Error('Order not found')
-
-    if (status == ORDER_STATUS.COMPLETED) {
-      await OrderItem.updateMany(
-        { orderId: id },
-        { status: ORDER_ITEM_STATUS.SERVED, updatedAt: new Date() },
-        { session }
-      )
+    if (!updatedOrder) {
+      throw new Error('Order not found')
     }
 
-    await session.commitTransaction()
-    session.endSession()
+    let updatedItemsResult = null
+    if (updatedOrder.status === ORDER_STATUS.COMPLETED) {
+      const filter = { order_id: new mongoose.Types.ObjectId(id) }
 
-    return updatedOrder
-    return updatedOrder
-  } catch (error) {
-    await session.abortTransaction()
-    session.endSession()
-    throw new Error('cannot update Order status')
+      const updateDoc = {
+        $set: { status: ORDER_ITEM_STATUS.SERVED, updatedAt: new Date() }
+      }
+
+      updatedItemsResult = await OrderItem.updateMany(filter, updateDoc)
+    }
+
+    return {
+      updatedOrder,
+      updatedItemsResult
+    }
+  } catch (error: any) {
+    throw new Error('Cannot update order status')
   }
 }
 
