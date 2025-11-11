@@ -84,7 +84,7 @@ export const updateOrderStatusController = async (req: Request, res: Response) =
       return res.status(400).json({ message: DEFAULT_MESSAGE.DEFAULT_ERROR })
     }
 
-    const updateOrder = await updateOrderStatusService(id, status.toUpperCase())
+    const updateOrder = await updateOrderStatusService(id, status)
 
     if (!updateOrder) {
       return res.status(404).json({ message: DEFAULT_MESSAGE.DEFAULT_ERROR })
