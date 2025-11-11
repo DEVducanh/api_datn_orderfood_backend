@@ -2,15 +2,20 @@ import { Request, Response, NextFunction } from 'express'
 import qs from 'query-string'
 import crypto from 'crypto'
 import moment from 'moment'
-import { updateInvoicePayment } from '~/services/invoices.service'
+import { getDetailInvoicesService, updateInvoicePayment } from '~/services/invoices.service'
 import Invoices from '../models/invoices.model'
 import { STATUS_INVOICES, STATUS_PAYMENTS } from '~/constants/enum'
+import { toObjectId } from './../utils/toObjectId'
 
 function sortObject(obj: any) {
   let sorted: Record<string, any> = {}
   let str = []
   let key
+
+  console.log('obj', obj)
+
   for (key in obj) {
+    console.log('key', key)
     if (obj.hasOwnProperty(key)) {
       str.push(encodeURIComponent(key))
     }
@@ -22,9 +27,26 @@ function sortObject(obj: any) {
   return sorted
 }
 
-export const createPaymentUrl = (req: Request, res: Response, next: NextFunction): void => {
+export const createPaymentUrl = async (req: Request, res: Response, next: NextFunction) => {
   try {
     process.env.TZ = 'Asia/Ho_Chi_Minh'
+    let invoicesId = req.body.invoicesId
+    let amount: number = req.body.amount
+    let bankCode: string = req.body.bankCode
+
+    console.log('id', invoicesId)
+    console.log('amuont', amount)
+
+    if (!invoicesId || !amount) {
+      return res.status(400).json({ message: 'Thiếu thông tin hóa đơn hoặc số tiền' })
+    }
+
+    const exitingInvoied = await getDetailInvoicesService(invoicesId)
+    console.log('exit', exitingInvoied)
+
+    if (exitingInvoied.data?.status == 'paid') {
+      return res.status(400).json({ message: 'Hóa đơn đã được thanh toán' })
+    }
 
     let date = new Date()
     let createDate = moment(date).format('YYYYMMDDHHmmss')
@@ -39,10 +61,6 @@ export const createPaymentUrl = (req: Request, res: Response, next: NextFunction
     let secretKey: string = process.env.vnp_HashSecret!
     let vnpUrl: string = process.env.vnp_Url!
     let returnUrl: string = process.env.vnp_ReturnUrl!
-
-    let invoicesId = req.body.invoicesId
-    let amount: number = req.body.amount
-    let bankCode: string = req.body.bankCode
 
     let locale: string = req.body.language
     if (locale === null || locale === '') {
@@ -84,13 +102,17 @@ export const createPaymentUrl = (req: Request, res: Response, next: NextFunction
   }
 }
 
-export const vnpayReturn = (req: Request, res: Response, next: NextFunction): void => {
+export const vnpayReturn = (req: Request, res: Response, next: NextFunction) => {
   try {
-    let vnp_Params = req.query
+    console.log('vao day')
+
+    let vnp_Params = { ...req.query }
     let secureHash = vnp_Params['vnp_SecureHash']
 
     delete vnp_Params['vnp_SecureHash']
     delete vnp_Params['vnp_SecureHashType']
+
+    console.log('vnparram', vnp_Params)
 
     vnp_Params = sortObject(vnp_Params)
 
@@ -102,14 +124,18 @@ export const vnpayReturn = (req: Request, res: Response, next: NextFunction): vo
     let hmac = crypto.createHmac('sha512', secretKey)
     let signed = hmac.update(new Buffer(signData, 'utf-8')).digest('hex')
 
+    console.log('secushhash', secureHash)
+    console.log('signed', signed)
+
     if (secureHash === signed) {
       updateInvoicePayment(vnp_Params['vnp_TxnRef'], 'VnPay')
-      res.render('success', { code: vnp_Params['vnp_ResponseCode'] })
+      res.json({ code: vnp_Params['vnp_ResponseCode'] })
     } else {
-      res.render('success', { code: '97' })
+      res.json({ code: '97' })
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log(error)
+    return res.status(400).json({ message: error.message })
   }
 }
 

@@ -184,10 +184,10 @@ const router = express.Router()
  *           schema:
  *             type: object
  *             required:
- *               - invoices_id
+ *               - order_id
  *               - method
  *             properties:
- *               invoices_id:
+ *               order_id:
  *                 type: string
  *                 description: ID của hóa đơn
  *               method:
