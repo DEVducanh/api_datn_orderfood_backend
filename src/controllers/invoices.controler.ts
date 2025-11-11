@@ -1,5 +1,10 @@
 import { Request, Response } from 'express'
-import { createInvoiceService, getAllInvoiceService, getDetailInvoicesService } from '~/services/invoices.service'
+import {
+  createInvoiceService,
+  getAllInvoiceService,
+  getDetailInvoicesService,
+  getInvoiceByOrderIdService
+} from '~/services/invoices.service'
 
 export const getAllInvoiceController = async (req: Request, res: Response) => {
   try {
@@ -75,5 +80,24 @@ export const createInvoiceController = async (req: Request, res: Response) => {
       success: false,
       message: error.message || 'Error creating invoice'
     })
+  }
+}
+
+export const getInvoiceByOrderId = async (req: Request, res: Response) => {
+  const { orderId } = req.params
+
+  if (!orderId) {
+    return res.status(400).json({
+      success: false,
+      message: 'Order ID is required'
+    })
+  }
+
+  const result = await getInvoiceByOrderIdService(orderId)
+
+  if (result.success) {
+    return res.status(200).json(result)
+  } else {
+    return res.status(404).json(result)
   }
 }
