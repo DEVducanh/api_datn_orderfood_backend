@@ -3,7 +3,8 @@ import {
   createInvoiceController,
   getAllInvoiceController,
   getDetailInvoiceControler,
-  getInvoiceByOrderId
+  getInvoiceByOrderId,
+  getPaidInvoiceByTableAndUserController
 } from '~/controllers/invoices.controler'
 
 const router = express.Router()
@@ -188,9 +189,12 @@ const router = express.Router()
  *               - order_id
  *               - method
  *             properties:
- *               order_id:
- *                 type: string
- *                 description: ID của hóa đơn
+ *               order_ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   example: "69131bc5a2b54005434e617b"
+ *                 description: Mảng id của các order để tạo hóa đơn
  *               method:
  *                 type: string
  *                 description: Phương thức thanh toán
@@ -211,11 +215,11 @@ const router = express.Router()
  *                   type: object
  *                   properties:
  *                     invoice_id:
- *                       type: string
+ *                       type: object
  *                     payment_id:
- *                       type: string
+ *                       type: object
  *                     transaction_id:
- *                       type: string
+ *                       type: object
  *       400:
  *         description: Dữ liệu đầu vào không hợp lệ (ví dụ order không tồn tại hoặc chưa hoàn thành)
  *         content:
@@ -340,5 +344,6 @@ router.get('/', getAllInvoiceController)
 router.get('/:id', getDetailInvoiceControler)
 router.post('/', createInvoiceController)
 router.get('/by-order/:orderId', getInvoiceByOrderId)
+router.get('/:tableId/:userId', getPaidInvoiceByTableAndUserController)
 
 export default router
