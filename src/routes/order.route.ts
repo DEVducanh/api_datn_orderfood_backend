@@ -1,7 +1,9 @@
 import express from 'express'
 import {
+  cancelUserOrderController,
   createOrderControler,
   deleteOrderControler,
+  getAllOrderByTableController,
   getAllOrderControler,
   getDetailOrderByTableIdController,
   updateOrderControler,
@@ -161,11 +163,118 @@ const router = express.Router()
  *         description: Không tìm thấy đơn hàng
  */
 
+/**
+ * @swagger
+ * /orders/by-table/{tableId}:
+ *   get:
+ *     summary: Lấy danh sách tất cả order theo bàn (và user nếu có)
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: tableId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID của bàn cần lấy order
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: ID của người dùng (nếu muốn lọc theo user)
+ *     responses:
+ *       200:
+ *         description: Lấy danh sách order thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Lấy danh sách đơn hàng thành công
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: 69131bc5a2b54005434e617b
+ *                       table_id:
+ *                         type: string
+ *                         example: 690e42bc597fefc62ae5f6e1
+ *                       user_id:
+ *                         type: string
+ *                         example: 69131b98a2b54005434e613c
+ *                       status:
+ *                         type: string
+ *                         example: Completed
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: 2025-11-12T08:15:00Z
+ *       400:
+ *         description: tableId không hợp lệ
+ *       500:
+ *         description: Lỗi server
+ */
+
+/**
+ * @swagger
+ * /orders/{id}/cancel:
+ *   patch:
+ *     summary: Hủy đơn hàng của user (chỉ khi Pending)
+ *     tags:
+ *       - Orders
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của đơn hàng cần hủy
+ *     responses:
+ *       200:
+ *         description: Hủy đơn hàng thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Order canceled
+ *                 updatedOrder:
+ *                   type: object
+ *                   description: Đơn hàng đã cập nhật
+ *                 updatedItemsResult:
+ *                   type: object
+ *                   description: Kết quả update các order item
+ *       400:
+ *         description: Lỗi request, ví dụ order không tồn tại hoặc không phải Pending
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Đầu bếp đang làm không thể hủy
+ *       500:
+ *         description: Lỗi server
+ */
+
 router.get('/', getAllOrderControler)
 router.get('/:tableId', getDetailOrderByTableIdController)
+router.get('/by-table/:tableId', getAllOrderByTableController)
 router.post('/', createOrderControler)
 router.patch('/:id', updateOrderControler)
 router.delete('/:id', deleteOrderControler)
 router.patch('/:id/status', updateOrderStatusController)
+router.patch('/:id/cancel', cancelUserOrderController)
 
 export default router
