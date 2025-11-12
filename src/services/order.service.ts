@@ -1,6 +1,7 @@
 import { IOrder } from '~/interfaces/order.type'
 import Order from '../models/order.model'
 import OrderItem from '../models/order-item.model'
+import Invoices from '../models/invoices.model'
 import { ORDER_ITEM_STATUS, ORDER_STATUS } from '~/constants/enum'
 import mongoose from 'mongoose'
 import orderItemModel from '../models/order-item.model'
@@ -135,6 +136,8 @@ export const updateOrderStatusService = async (id: string, status: string) => {
       updatedItemsResult = await OrderItem.updateMany(filter, updateDoc)
     }
 
+    console.log(updatedItemsResult)
+
     return {
       updatedOrder,
       updatedItemsResult
@@ -156,10 +159,17 @@ export const deleteOrderService = async (id: string) => {
 export const getAllOrderByTableService = async (tableId: string, userId?: string) => {
   try {
     const filter: any = { table_id: new mongoose.Types.ObjectId(tableId) }
-
     if (userId) filter.user_id = userId
 
-    const orders = await Order.find(filter).select('-orderItems').lean()
+    const invoicedOrders = await Invoices.find().distinct('order_id')
+
+    // Lọc ra các order chưa có trong Invoice
+    const orders = await Order.find({
+      ...filter,
+      _id: { $nin: invoicedOrders }
+    })
+      .select('-orderItems')
+      .lean()
 
     return {
       success: true,
