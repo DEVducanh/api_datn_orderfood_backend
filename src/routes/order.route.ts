@@ -267,48 +267,6 @@ const router = express.Router()
  *       500:
  *         description: Lỗi server
  */
-/**
- * @swagger
- * /invoice/{tableId}/{userId}:
- *   get:
- *     summary: Lấy hóa đơn đã thanh toán theo bàn và user
- *     tags: [Invoices]
- *     parameters:
- *       - in: path
- *         name: tableId
- *         required: true
- *         schema:
- *           type: string
- *         description: ID của bàn
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: string
- *         description: ID của người dùng
- *     responses:
- *       200:
- *         description: Lấy hóa đơn thành công
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     description: Thông tin hóa đơn đã thanh toán
- *       400:
- *         description: Thiếu tableId hoặc userId
- *       404:
- *         description: Không tìm thấy hóa đơn đã thanh toán
- *       500:
- *         description: Lỗi server
- */
 
 router.get('/', getAllOrderControler)
 router.get('/:tableId', getDetailOrderByTableIdController)
