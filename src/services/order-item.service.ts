@@ -73,13 +73,15 @@ export const updateSttOrderItemService = async (id: string, status: ORDER_ITEM_S
     await orderItem!.save()
 
     const orderId = orderItem?.order_id
-    const remaining = await OrderItem.countDocuments({
-      order_id: orderId,
-      status: { $ne: ORDER_ITEM_STATUS.SERVED }
-    })
 
-    if (remaining === 0) {
+    const totalItems = await OrderItem.countDocuments({ order_id: orderId })
+    const servedCount = await OrderItem.countDocuments({ order_id: orderId, status: ORDER_ITEM_STATUS.SERVED })
+    const canceledCount = await OrderItem.countDocuments({ order_id: orderId, status: ORDER_ITEM_STATUS.CANCELED })
+
+    if (servedCount === totalItems) {
       await Order.findByIdAndUpdate(orderId, { status: ORDER_STATUS.COMPLETED })
+    } else if (canceledCount === totalItems) {
+      await Order.findByIdAndUpdate(orderId, { status: ORDER_STATUS.CANCELED })
     }
 
     return {
