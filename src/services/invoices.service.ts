@@ -48,7 +48,7 @@ export const getDetailInvoicesService = async (id: string) => {
     }
 
     const order = await Order.findById(invoice.order_id)
-    const order_item = await OrderItem.find({ order_id: order?._id })
+    const order_items = await OrderItem.find({ order_id: order?._id }).populate('dish_id', 'dish_name')
 
     const user = invoice.user_id ? await User.findById(invoice.user_id) : null
     const table = invoice.table_id ? await Table.findById(invoice.table_id) : null
@@ -63,14 +63,16 @@ export const getDetailInvoicesService = async (id: string) => {
     const invoiceDetail = {
       _id: invoice._id,
       order_id: invoice.order_id,
+      order_item: order_items.map((item) => ({
+        dish_name: (item.dish_id as any).dish_name,
+        quantity: item.quantity
+      })),
       user: user ? { id: user._id, name: user.username, email: user.email } : null,
       table: table ? { id: table._id, name: table.table_name } : null,
       total_amount: invoice.total_amount,
       status: invoice.status,
       created_at: invoice.created_at,
       updated_at: invoice.updated_at,
-      order_item: order_item,
-
       payment: payment
         ? {
             id: payment._id,
