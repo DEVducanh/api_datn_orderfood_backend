@@ -46,8 +46,12 @@ export const getDetailInvoicesService = async (id: string) => {
       }
     }
 
-    const order = await Order.findById(invoice.order_id)
-    const order_item = await OrderItem.find({ order_id: order?._id })
+    const orders = await Order.find({
+      _id: { $in: invoice.order_id }
+    })
+    const order_items = await OrderItem.find({
+      order_id: { $in: invoice.order_id }
+    }).populate('dish_id', 'dish_name price')
 
     const user = invoice.user_id ? await User.findById(invoice.user_id) : null
     const table = invoice.table_id ? await Table.findById(invoice.table_id) : null
@@ -68,7 +72,7 @@ export const getDetailInvoicesService = async (id: string) => {
       status: invoice.status,
       created_at: invoice.created_at,
       updated_at: invoice.updated_at,
-      order_item: order_item,
+      order_item: order_items,
 
       payment: payment
         ? {
