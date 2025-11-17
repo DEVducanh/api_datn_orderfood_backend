@@ -6,6 +6,7 @@ import Table from '../models/table.model'
 import OrderItem from '../models/order-item.model'
 import Payments from '../models/payment.model'
 import Transactions from '../models/transaction.model'
+import mongoose from 'mongoose'
 
 export const getAllInvoiceService = async () => {
   try {
@@ -66,6 +67,10 @@ export const getDetailInvoicesService = async (id: string) => {
     const invoiceDetail = {
       _id: invoice._id,
       order_id: invoice.order_id,
+      order_item: order_items.map((item) => ({
+        dish_name: (item.dish_id as any).dish_name,
+        quantity: item.quantity
+      })),
       user: user ? { id: user._id, name: user.username, email: user.email } : null,
       table: table ? { id: table._id, name: table.table_name } : null,
       total_amount: invoice.total_amount,
@@ -107,34 +112,24 @@ export const getDetailInvoicesService = async (id: string) => {
   }
 }
 
-export const createInvoiceService = async (payload: { order_id: string; method?: string }) => {
+export const createInvoiceService = async (payload: { order_ids: string[]; method?: string }) => {
   try {
-    const order = await Order.findById(payload.order_id)
+    const orders = await Order.find({
+      _id: { $in: payload.order_ids },
+      status: ORDER_STATUS.COMPLETED
+    })
 
-    if (!order) {
-      return {
-        success: false,
-        message: 'Order Không tìm thấy'
-      }
+    if (!orders.length) {
+      return { success: false, message: 'Không có order COMPLETED nào' }
     }
 
-    if (order.status !== ORDER_STATUS.COMPLETED) {
-      return {
-        success: false,
-        message: 'Invoice chỉ có thể tạo khi đơn hàng ở trạng thái COMPLETED'
-      }
-    }
-
-    const existingInvoice = await Invoices.findOne({ order_id: order._id })
-    if (existingInvoice) {
-      return { success: false, message: 'Invoice already exists for this order' }
-    }
+    const totalAmount = orders.reduce((sum, o) => sum + o?.total_price!, 0)
 
     const newInvoice = new Invoices({
-      order_id: order._id,
-      user_id: order.user_id,
-      table_id: order.table_id,
-      total_amount: order.total_price,
+      order_id: orders.map((o) => o._id),
+      user_id: orders[0].user_id,
+      table_id: orders[0].table_id,
+      total_amount: totalAmount,
       status: STATUS_INVOICES.UNPAID,
       created_at: new Date(),
       updated_at: new Date()
@@ -146,7 +141,7 @@ export const createInvoiceService = async (payload: { order_id: string; method?:
     const newPayment = new Payments({
       invoice_id: savedInvoice._id,
       method: payload.method || PAYMENT_METHOD.CASH,
-      amount_paid: order.total_price,
+      amount_paid: totalAmount,
       status: isCash ? STATUS_PAYMENTS.SUCCESS : STATUS_PAYMENTS.FAILED,
       created_at: new Date()
     })
@@ -159,10 +154,10 @@ export const createInvoiceService = async (payload: { order_id: string; method?:
 
     const newTransaction = new Transactions({
       payment_id: savedPayment._id,
-      user_id: order.user_id,
+      user_id: orders[0].user_id,
       invoices_id: savedInvoice._id,
       type: payload.method || 'Cash',
-      amount_paid: order.total_price,
+      amount_paid: totalAmount,
       status: isCash ? 'Completed' : 'Cancelled',
       create_at: new Date()
     })
@@ -235,5 +230,92 @@ export const updateInvoicePayment = async (invoicesId: any, method: string) => {
     success: true,
     message: 'Invoice, payment và transaction đã cập nhật thành công',
     data: { invoice, payment, transaction }
+  }
+}
+
+export const getInvoiceByOrderIdService = async (order_id: string) => {
+  try {
+    const invoice = await Invoices.findOne({ order_id })
+    if (!invoice) {
+      return {
+        success: false,
+        message: 'Invoice not found for this order'
+      }
+    }
+
+    const order = await Order.findById(invoice.order_id)
+    const user = invoice.user_id ? await User.findById(invoice.user_id) : null
+    const table = invoice.table_id ? await Table.findById(invoice.table_id) : null
+    const payment = await Payments.findOne({ invoice_id: invoice._id })
+
+    let transaction = null
+    if (payment?._id) {
+      transaction = await Transactions.findOne({ payment_id: payment._id })
+    }
+
+    // Build detail object
+    const invoiceDetail = {
+      _id: invoice._id,
+      order_id: invoice.order_id,
+      user: user ? { id: user._id, name: user.username, email: user.email } : null,
+      table: table ? { id: table._id, name: table.table_name } : null,
+      total_amount: invoice.total_amount,
+      status: invoice.status,
+      created_at: invoice.created_at,
+      updated_at: invoice.updated_at,
+
+      payment: payment
+        ? {
+            id: payment._id,
+            method: payment.method,
+            status: payment.status,
+            amount_paid: payment.amount_paid
+          }
+        : null,
+
+      transaction: transaction
+        ? {
+            id: transaction._id,
+            status: transaction.status,
+            type: transaction.type,
+            amount_paid: transaction.amount_paid,
+            created_at: transaction.create_at
+          }
+        : null
+    }
+
+    return {
+      success: true,
+      message: 'Get invoice detail successfully',
+      data: invoiceDetail
+    }
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || 'Error getting invoice'
+    }
+  }
+}
+
+export const getPaidInvoiceByTableAndUserService = async (tableId: string, userId: string) => {
+  try {
+    const filter = {
+      table_id: new mongoose.Types.ObjectId(tableId),
+      user_id: new mongoose.Types.ObjectId(userId),
+      status: 'paid'
+    }
+
+    const invoice = await Invoices.findOne(filter).lean()
+    if (!invoice) return null
+
+    const orderItems = await OrderItem.find({
+      order_id: { $in: invoice.order_id }
+    }).lean()
+
+    return { invoice, orderItems }
+  } catch (error) {
+    console.log('aaaaaa')
+
+    throw error
   }
 }

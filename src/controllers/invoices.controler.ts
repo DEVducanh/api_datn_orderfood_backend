@@ -1,5 +1,12 @@
 import { Request, Response } from 'express'
-import { createInvoiceService, getAllInvoiceService, getDetailInvoicesService } from '~/services/invoices.service'
+
+import {
+  createInvoiceService,
+  getAllInvoiceService,
+  getDetailInvoicesService,
+  getInvoiceByOrderIdService,
+  getPaidInvoiceByTableAndUserService
+} from '~/services/invoices.service'
 
 export const getAllInvoiceController = async (req: Request, res: Response) => {
   try {
@@ -43,37 +50,56 @@ export const getDetailInvoiceControler = async (req: Request, res: Response) => 
 
 export const createInvoiceController = async (req: Request, res: Response) => {
   try {
-    const { order_id, method } = req.body
+    const payload = req.body
+    const result = await createInvoiceService(payload)
+    return res.status(result.success ? 200 : 400).json(result)
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Server error', error })
+  }
+}
 
-    if (!order_id) {
-      return res.status(400).json({
-        success: false,
-        message: 'Missing required field: order_id'
-      })
-    }
+export const getInvoiceByOrderId = async (req: Request, res: Response) => {
+  const { orderId } = req.params
 
-    const result = await createInvoiceService({
-      order_id,
-      method
+  if (!orderId) {
+    return res.status(400).json({
+      success: false,
+      message: 'Order ID is required'
     })
+  }
 
-    if (!result.success) {
-      if (result.message.includes('Completed') || result.message.includes('exists')) {
-        return res.status(409).json(result)
-      }
-      return res.status(500).json(result)
-    }
+  const result = await getInvoiceByOrderIdService(orderId)
+
+  if (result.success) {
+    return res.status(200).json(result)
+  } else {
+    return res.status(404).json(result)
+  }
+}
+
+export const getPaidInvoiceByTableAndUserController = async (req: Request, res: Response) => {
+  try {
+    const { tableId, userId } = req.params
+
+    if (!tableId) return res.status(400).json({ success: false, message: 'Thiếu tableId' })
+
+    const result = await getPaidInvoiceByTableAndUserService(tableId, userId)
+
+    if (!result)
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy hóa đơn đã thanh toán'
+      })
 
     return res.status(200).json({
       success: true,
-      message: 'Invoice, payment, and transaction created successfully',
-      data: result.data
+      data: result
     })
   } catch (error: any) {
-    console.error('Error in createInvoiceController:', error)
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
-      message: error.message || 'Error creating invoice'
+      message: 'Lỗi server',
+      error: error.message
     })
   }
 }

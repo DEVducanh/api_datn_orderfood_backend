@@ -20,8 +20,8 @@ export const getOrderItemControler = async (req: Request, res: Response) => {
 
 export const updateSttOderItemControler = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params // lấy id từ URL
-    const { status } = req.body // lấy status từ body
+    const { id } = req.params
+    const { status } = req.body
 
     const result = await updateSttOrderItemService(id, status)
 

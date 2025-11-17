@@ -12,7 +12,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /create-payment:
+ * /payment/create-payment:
  *   post:
  *     summary: Tạo URL thanh toán VNPay
  *     tags: [Payments]
@@ -88,8 +88,8 @@ const router = express.Router()
 
 /**
  * @swagger
- * /vnpay-return:
- *   post:
+ * /payment/vnpay-return:
+ *   get:
  *     summary: Xử lý callback trả về từ VNPay (vnreturn)
  *     tags: [Payments]
  *     requestBody:
@@ -99,16 +99,6 @@ const router = express.Router()
  *           schema:
  *             type: object
  *             description: Dữ liệu callback từ VNPay
- *             example:
- *               vnp_Amount: "5000000"
- *               vnp_BankCode: "VNPAYQR"
- *               vnp_BankTranNo: "20251111001"
- *               vnp_CardType: "ATM"
- *               vnp_OrderInfo: "Thanh toán đơn hàng #123"
- *               vnp_PayDate: "20251111120000"
- *               vnp_ResponseCode: "00"
- *               vnp_TransactionNo: "123456789"
- *               vnp_SecureHash: "abcdef1234567890"
  *     responses:
  *       200:
  *         description: Kết quả xác nhận thanh toán VNPay
@@ -152,7 +142,7 @@ const router = express.Router()
  */
 
 router.post('/create-payment', createPaymentUrl)
-router.post('/vnpay-return', vnpayReturn)
+router.get('/vnpay-return', vnpayReturn)
 router.get('/vnpay_ipn', vnpIpn)
 
 export default router

@@ -27,6 +27,7 @@ export const updateSttOrderItemService = async (id: string, status: ORDER_ITEM_S
     if (!id) throw new Error('Thiếu order item id')
     if (!status) throw new Error('Thiếu status')
     const orderItem = await OrderItem.findById(id)
+    if (!orderItem) throw new Error('Không tìm thấy order item')
 
     const statusFlow: ORDER_ITEM_STATUS[] = [
       ORDER_ITEM_STATUS.PENDING,
@@ -35,7 +36,7 @@ export const updateSttOrderItemService = async (id: string, status: ORDER_ITEM_S
       ORDER_ITEM_STATUS.SERVED
     ]
 
-    if (orderItem?.status === ORDER_ITEM_STATUS.CANCELED) {
+    if (orderItem.status === ORDER_ITEM_STATUS.CANCELED) {
       return {
         success: false,
         message: 'Canceled order items cannot be updated'
@@ -43,54 +44,59 @@ export const updateSttOrderItemService = async (id: string, status: ORDER_ITEM_S
     }
 
     if (status === ORDER_ITEM_STATUS.CANCELED) {
-      orderItem!.status = ORDER_ITEM_STATUS.CANCELED
-      await orderItem!.save()
-      return {
-        success: true,
-        message: 'Order item đã được hủy',
-        data: orderItem
+      orderItem.status = ORDER_ITEM_STATUS.CANCELED
+    } else {
+      const currentIndex = statusFlow.indexOf(orderItem.status)
+      const newIndex = statusFlow.indexOf(status)
+
+      if (newIndex < currentIndex) {
+        return {
+          success: false,
+          message: `Không thể chuyển trạng thái từ ${orderItem.status} đến ${status}`
+        }
       }
+
+      if (newIndex > currentIndex + 1) {
+        return {
+          success: false,
+          message: `Invalid status transition from ${orderItem.status} to ${status}`
+        }
+      }
+
+      orderItem.status = status
     }
 
-    const currentIndex = statusFlow.indexOf(orderItem!.status)
-    const newIndex = statusFlow.indexOf(status)
+    await orderItem.save()
 
-    if (newIndex < currentIndex) {
-      return {
-        success: false,
-        message: `Không thể chuyển trạng thái từ ${orderItem!.status} đến ${status}`
-      }
-    }
+    const orderId = orderItem.order_id
 
-    if (newIndex > currentIndex + 1) {
-      return {
-        success: false,
-        message: `Invalid status transition from ${orderItem!.status} to ${status}`
-      }
-    }
+    const totalItems = await OrderItem.countDocuments({ order_id: orderId })
+    const servedCount = await OrderItem.countDocuments({ order_id: orderId, status: ORDER_ITEM_STATUS.SERVED })
+    const canceledCount = await OrderItem.countDocuments({ order_id: orderId, status: ORDER_ITEM_STATUS.CANCELED })
 
-    orderItem!.status = status
-    await orderItem!.save()
+    let updatedOrder = null
 
-    const orderId = orderItem?.order_id
-    const remaining = await OrderItem.countDocuments({
-      order_id: orderId,
-      status: { $ne: ORDER_ITEM_STATUS.SERVED }
-    })
-
-    if (remaining === 0) {
-      await Order.findByIdAndUpdate(orderId, { status: ORDER_STATUS.COMPLETED })
+    if (servedCount === totalItems) {
+      updatedOrder = await Order.findByIdAndUpdate(orderId, { status: ORDER_STATUS.COMPLETED }, { new: true })
+    } else if (canceledCount === totalItems) {
+      updatedOrder = await Order.findByIdAndUpdate(orderId, { status: ORDER_STATUS.CANCELED }, { new: true })
+    } else {
+      updatedOrder = await Order.findById(orderId)
     }
 
     return {
       success: true,
-      message: 'Cập nhật trạng thái order item thành công',
-      data: orderItem
+      message:
+        status === ORDER_ITEM_STATUS.CANCELED ? 'Order item đã được hủy' : 'Cập nhật trạng thái order item thành công',
+      data: {
+        order_item: orderItem,
+        order_status: updatedOrder?.status
+      }
     }
   } catch (error: any) {
     return {
       success: false,
-      message: error.message || 'Error Update Status Order Item'
+      message: error.message || 'Lỗi khi cập nhật trạng thái order item'
     }
   }
 }

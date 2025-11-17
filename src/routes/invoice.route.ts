@@ -2,7 +2,9 @@ import express from 'express'
 import {
   createInvoiceController,
   getAllInvoiceController,
-  getDetailInvoiceControler
+  getDetailInvoiceControler,
+  getInvoiceByOrderId,
+  getPaidInvoiceByTableAndUserController
 } from '~/controllers/invoices.controler'
 
 const router = express.Router()
@@ -184,12 +186,15 @@ const router = express.Router()
  *           schema:
  *             type: object
  *             required:
- *               - invoices_id
+ *               - order_id
  *               - method
  *             properties:
- *               invoices_id:
- *                 type: string
- *                 description: ID của hóa đơn
+ *               order_ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   example: "69131bc5a2b54005434e617b"
+ *                 description: Mảng id của các order để tạo hóa đơn
  *               method:
  *                 type: string
  *                 description: Phương thức thanh toán
@@ -210,11 +215,11 @@ const router = express.Router()
  *                   type: object
  *                   properties:
  *                     invoice_id:
- *                       type: string
+ *                       type: object
  *                     payment_id:
- *                       type: string
+ *                       type: object
  *                     transaction_id:
- *                       type: string
+ *                       type: object
  *       400:
  *         description: Dữ liệu đầu vào không hợp lệ (ví dụ order không tồn tại hoặc chưa hoàn thành)
  *         content:
@@ -231,8 +236,158 @@ const router = express.Router()
  *         description: Lỗi server hoặc lỗi xử lý logic
  */
 
+/**
+ * @swagger
+ * /invoices/by-order/{orderId}:
+ *   get:
+ *     summary: Lấy chi tiết hóa đơn theo order ID
+ *     tags: [Invoices]
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của order
+ *     responses:
+ *       200:
+ *         description: Lấy hóa đơn thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Get invoice detail successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     order_id:
+ *                       type: string
+ *                     user:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         name:
+ *                           type: string
+ *                         email:
+ *                           type: string
+ *                     table:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         name:
+ *                           type: string
+ *                     total_amount:
+ *                       type: number
+ *                     status:
+ *                       type: string
+ *                     created_at:
+ *                       type: string
+ *                     updated_at:
+ *                       type: string
+ *                     order_item:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                     payment:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         method:
+ *                           type: string
+ *                         status:
+ *                           type: string
+ *                         amount_paid:
+ *                           type: number
+ *                     transaction:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         status:
+ *                           type: string
+ *                         type:
+ *                           type: string
+ *                         amount_paid:
+ *                           type: number
+ *                         created_at:
+ *                           type: string
+ *       404:
+ *         description: Hóa đơn không tồn tại
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invoice not found for this order"
+ */
+
+/**
+ * @swagger
+ * /invoices/{tableId}/{userId}:
+ *   get:
+ *     summary: Lấy hóa đơn đã thanh toán theo bàn và user
+ *     tags: [Invoices]
+ *     parameters:
+ *       - in: path
+ *         name: tableId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của bàn
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của người dùng
+ *     responses:
+ *       200:
+ *         description: Lấy hóa đơn thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     description: Thông tin hóa đơn đã thanh toán
+ *       400:
+ *         description: Thiếu tableId hoặc userId
+ *       404:
+ *         description: Không tìm thấy hóa đơn đã thanh toán
+ *       500:
+ *         description: Lỗi server
+ */
+
 router.get('/', getAllInvoiceController)
 router.get('/:id', getDetailInvoiceControler)
 router.post('/', createInvoiceController)
+router.get('/by-order/:orderId', getInvoiceByOrderId)
+router.get('/:tableId/:userId', getPaidInvoiceByTableAndUserController)
 
 export default router

@@ -1,9 +1,12 @@
 import { Request, Response } from 'express'
+import mongoose from 'mongoose'
 import { DEFAULT_MESSAGE } from '~/constants/message'
 import { checkoutCartService } from '~/services/cart.service'
 import {
+  cancelUserOrderService,
   createOrderService,
   deleteOrderService,
+  getAllOrderByTableService,
   getAllOrderService,
   getDetailOrderByTableIdService,
   updateOrderService,
@@ -84,7 +87,7 @@ export const updateOrderStatusController = async (req: Request, res: Response) =
       return res.status(400).json({ message: DEFAULT_MESSAGE.DEFAULT_ERROR })
     }
 
-    const updateOrder = await updateOrderStatusService(id, status.toUpperCase())
+    const updateOrder = await updateOrderStatusService(id, status)
 
     if (!updateOrder) {
       return res.status(404).json({ message: DEFAULT_MESSAGE.DEFAULT_ERROR })
@@ -132,5 +135,37 @@ export const checkoutCartController = async (req: Request, res: Response) => {
       success: false,
       message: error.message || 'Failed to checkout cart'
     })
+  }
+}
+
+export const getAllOrderByTableController = async (req: Request, res: Response) => {
+  try {
+    const { tableId } = req.params
+    const { userId } = req.query as { userId?: string }
+
+    if (!mongoose.Types.ObjectId.isValid(tableId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'tableId không hợp lệ'
+      })
+    }
+
+    const result = await getAllOrderByTableService(tableId, userId)
+    res.status(result.success ? 200 : 400).json(result)
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Server error'
+    })
+  }
+}
+
+export const cancelUserOrderController = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+    const result = await cancelUserOrderService(id)
+    res.status(200).json({ message: 'Order canceled', ...result })
+  } catch (error: any) {
+    res.status(400).json({ message: error.message })
   }
 }

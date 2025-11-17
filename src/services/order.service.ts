@@ -1,5 +1,10 @@
 import { IOrder } from '~/interfaces/order.type'
 import Order from '../models/order.model'
+import OrderItem from '../models/order-item.model'
+import Invoices from '../models/invoices.model'
+import { ORDER_ITEM_STATUS, ORDER_STATUS } from '~/constants/enum'
+import mongoose from 'mongoose'
+import orderItemModel from '../models/order-item.model'
 
 export const buildOrderPipeline = (dbQuery: any, dbSort: any, search?: string) => {
   const pipeline: any[] = []
@@ -89,7 +94,6 @@ export const createOrderService = async (data: IOrder): Promise<IOrder> => {
     const newOrder = await new Order(data).save()
     return newOrder
   } catch (error) {
-    // console.log(error)
     throw new Error('Cannot create order !!')
   }
 }
@@ -107,10 +111,39 @@ export const updateOrderStatusService = async (id: string, status: string) => {
   try {
     const updatedOrder = await Order.findByIdAndUpdate(id, { status, updatedAt: new Date() }, { new: true })
 
-    return updatedOrder
-  } catch (error) {
-    // console.error('Lỗi trong updateOrderStatusService:', error)
-    throw new Error('cannot update Order status')
+    if (!updatedOrder) {
+      throw new Error('Order not found')
+    }
+
+    let updatedItemsResult = null
+    if (updatedOrder.status === ORDER_STATUS.COMPLETED) {
+      const filter = { order_id: new mongoose.Types.ObjectId(id) }
+
+      const updateDoc = {
+        $set: { status: ORDER_ITEM_STATUS.SERVED, updatedAt: new Date() }
+      }
+
+      updatedItemsResult = await OrderItem.updateMany(filter, updateDoc)
+    }
+
+    if (updatedOrder.status === ORDER_STATUS.CANCELED) {
+      const filter = { order_id: new mongoose.Types.ObjectId(id) }
+
+      const updateDoc = {
+        $set: { status: ORDER_ITEM_STATUS.CANCELED, updatedAt: new Date() }
+      }
+
+      updatedItemsResult = await OrderItem.updateMany(filter, updateDoc)
+    }
+
+    console.log(updatedItemsResult)
+
+    return {
+      updatedOrder,
+      updatedItemsResult
+    }
+  } catch (error: any) {
+    throw new Error('Cannot update order status')
   }
 }
 
@@ -121,4 +154,47 @@ export const deleteOrderService = async (id: string) => {
   } catch (error) {
     throw new Error('cannot delete Order')
   }
+}
+
+export const getAllOrderByTableService = async (tableId: string, userId?: string) => {
+  try {
+    const filter: any = { table_id: new mongoose.Types.ObjectId(tableId) }
+    if (userId) filter.user_id = userId
+
+    const invoicedOrders = await Invoices.find().distinct('order_id')
+
+    // Lọc ra các order chưa có trong Invoice
+    const orders = await Order.find({
+      ...filter,
+      _id: { $nin: invoicedOrders }
+    })
+      .select('-orderItems')
+      .lean()
+
+    return {
+      success: true,
+      data: orders
+    }
+  } catch (error) {
+    throw new Error('Cannot get all order !!')
+  }
+}
+
+export const cancelUserOrderService = async (id: string) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) throw new Error('Invalid order ID')
+
+  const order = await Order.findById(id)
+  if (!order) throw new Error('Order Không tìm thấy')
+  if (order.status !== ORDER_STATUS.PENDING) throw new Error('Đầu bếp đã làm không thể hủy')
+
+  order.status = ORDER_STATUS.CANCELED
+  order.updatedAt = new Date().toISOString()
+  const updatedOrder = await order.save()
+
+  const updatedItemsResult = await OrderItem.updateMany(
+    { order_id: new mongoose.Types.ObjectId(id) },
+    { $set: { status: ORDER_ITEM_STATUS.CANCELED, updatedAt: new Date() } }
+  )
+
+  return { updatedOrder, updatedItemsResult }
 }
