@@ -92,7 +92,7 @@ export const createFeedBackService = async (
 
 export const getAllFeedBackService = async () => {
   try {
-    const data = await FeedBack.find()
+    const data = await FeedBack.find().populate('user_id', 'username').populate('dish_id', 'dish_name')
     return data
   } catch (error: any) {
     return {
