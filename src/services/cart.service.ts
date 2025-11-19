@@ -42,13 +42,22 @@ export const getOneCartService = async (table_id: string, user_id: string) => {
   }
 }
 
-export const createCartService = async (user_id: string, table_id: string) => {
+export const createCartService = async (user_id: string | null, session_id: string | null, table_id: string) => {
   try {
-    let cart = await Cart.findOne({ user_id, table_id })
-    if (!cart) {
-      cart = await Cart.create({ user_id, table_id, total_price: 0 })
+    let cart
+    if (user_id) {
+      cart = await Cart.findOne({ user_id, table_id })
+    } else if (session_id) {
+      cart = await Cart.findOne({ session_id, table_id })
     }
-
+    if (!cart) {
+      cart = await Cart.create({
+        user_id: user_id || null,
+        session_id: session_id || null,
+        table_id,
+        total_price: 0
+      })
+    }
     const cartItems = await Cart_Item.find({ cart_id: cart._id })
     const total_price = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
@@ -57,16 +66,27 @@ export const createCartService = async (user_id: string, table_id: string) => {
 
     return cart
   } catch (error) {
-    // console.log(error)
     throw new Error('Error creating cart')
   }
 }
 
-export const addToCartService = async (user_id: string, table_id: string, dish_id: string, quantity: number) => {
+export const addToCartService = async (
+  user_id: string | null,
+  session_id: string | null,
+  table_id: string,
+  dish_id: string,
+  quantity: number
+) => {
   try {
-    let cart = await Cart.findOne({ user_id, table_id })
+    let cart
+    if (user_id) {
+      cart = await Cart.findOne({ user_id, table_id })
+    } else if (session_id) {
+      cart = await Cart.findOne({ session_id, table_id })
+    }
+
     if (!cart) {
-      cart = await createCartService(user_id, table_id)
+      cart = await createCartService(user_id, session_id, table_id)
     }
 
     let cart_item = await Cart_Item.findOne({ cart_id: cart._id, dish_id })
@@ -74,10 +94,8 @@ export const addToCartService = async (user_id: string, table_id: string, dish_i
     const dish = await Dish.findById(dish_id)
     if (!dish) throw new Error('Dish not found')
 
-    // const price = dish.price
     if (cart_item) {
       cart_item.quantity += quantity
-      // cart_item.price = cart_item.quantity * dish.price
       await cart_item.save()
     } else {
       cart_item = await Cart_Item.create({
@@ -88,7 +106,6 @@ export const addToCartService = async (user_id: string, table_id: string, dish_i
       })
     }
 
-    //  Cập nhật lại total_price trong Cart
     const cartItems = await Cart_Item.find({ cart_id: cart._id })
     const total_price = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
@@ -111,11 +128,9 @@ export const addToCartService = async (user_id: string, table_id: string, dish_i
 
 export const checkoutCartService = async (user_id: string, table_id: string) => {
   try {
-    // Tìm giỏ hàng hiện tại
     const cart = await Cart.findOne({ user_id, table_id })
     if (!cart) throw new Error('Cart not found')
 
-    // Lấy các món trong giỏ hàng
     const cartItems = await Cart_Item.find({ cart_id: cart._id })
     if (cartItems.length === 0) throw new Error('Cart is empty')
 
