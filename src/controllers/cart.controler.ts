@@ -10,7 +10,7 @@ import {
 
 export const createCartController = async (req: Request, res: Response) => {
   try {
-    const { user_id, table_id } = req.body
+    const { user_id, table_id, session_id } = req.body
 
     if (!user_id || !table_id) {
       return res.status(400).json({
@@ -20,7 +20,7 @@ export const createCartController = async (req: Request, res: Response) => {
     }
 
     // Gọi service
-    const cart = await createCartService(user_id, table_id)
+    const cart = await createCartService(user_id, session_id, table_id)
 
     return res.status(200).json({
       success: true,
@@ -38,7 +38,7 @@ export const createCartController = async (req: Request, res: Response) => {
 
 export const addToCartControler = async (req: Request, res: Response) => {
   try {
-    const { user_id, table_id, dish_id, quantity } = req.body
+    const { user_id, session_id, table_id, dish_id, quantity } = req.body
 
     // Kiểm tra dữ liệu đầu vào
     if (!table_id || !dish_id || !quantity) {
@@ -49,7 +49,7 @@ export const addToCartControler = async (req: Request, res: Response) => {
     }
 
     // Gọi service xử lý logic
-    const result = await addToCartService(user_id, table_id, dish_id, quantity)
+    const result = await addToCartService(user_id, session_id, table_id, dish_id, quantity)
 
     return res.status(200).json({
       success: true,

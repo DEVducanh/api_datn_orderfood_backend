@@ -1,4 +1,5 @@
 import express from 'express'
+import { USER_ROLE } from '~/constants/enum'
 import {
   cancelUserOrderController,
   createOrderControler,
@@ -9,6 +10,7 @@ import {
   updateOrderControler,
   updateOrderStatusController
 } from '~/controllers/order.controler'
+import { authMiddleware, roleMiddleware } from '~/middlewares/auth'
 
 const router = express.Router()
 
@@ -273,7 +275,7 @@ router.get('/:tableId', getDetailOrderByTableIdController)
 router.get('/by-table/:tableId', getAllOrderByTableController)
 router.post('/', createOrderControler)
 router.patch('/:id', updateOrderControler)
-router.delete('/:id', deleteOrderControler)
+router.delete('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), deleteOrderControler)
 router.patch('/:id/status', updateOrderStatusController)
 router.patch('/:id/cancel', cancelUserOrderController)
 
