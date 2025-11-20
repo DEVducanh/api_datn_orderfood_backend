@@ -147,9 +147,8 @@ const router = express.Router()
 
 router.get('/', getAllCategoryControler)
 router.get('/:id', getOneCategoryControler)
-// authMiddleware, roleMiddleware([USER_ROLE.ADMIN]),
-router.post('/', createCategoryControler)
-router.patch('/:id', updateCategoryControler)
-router.delete('/:id', deleteCategoryControler)
+router.post('/', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), createCategoryControler)
+router.patch('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), updateCategoryControler)
+router.delete('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), deleteCategoryControler)
 
 export default router

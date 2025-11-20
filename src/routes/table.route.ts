@@ -163,9 +163,9 @@ const router = express.Router()
  */
 
 router.get('/', getAllTableController)
-router.post('/', createTableController)
-router.patch('/:id', updateTableController)
+router.post('/', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), createTableController)
+router.patch('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), updateTableController)
 router.patch('/:id/status', updateTableStatusController)
-router.delete('/:id', deleteTableController)
+router.delete('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), deleteTableController)
 
 export default router

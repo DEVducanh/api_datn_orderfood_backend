@@ -181,11 +181,10 @@ const router = express.Router()
  *         description: Lỗi khi xóa người dùng
  */
 
-router.get('/', getAllUserControler)
-router.post('/', createUserControler)
-router.get('/:id', getOneUserControler)
-router.post('/', createUserControler)
-router.patch('/:id', updateUserControler)
+router.get('/', authMiddleware, getAllUserControler)
+router.post('/', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), createUserControler)
+router.get('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), getOneUserControler)
+router.patch('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), updateUserControler)
 router.delete('/:id', deleteUserControler)
 
 export default router

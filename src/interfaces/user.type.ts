@@ -1,6 +1,8 @@
+import { Types } from 'mongoose'
 import { USER_ROLE } from '~/constants/enum'
 
 export interface IUser {
+  _id: Types.ObjectId
   username: string
   email: string
   phone: string

@@ -1,9 +1,13 @@
-import mongoose from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 import { USER_ROLE } from '~/constants/enum'
 import { IUser } from '~/interfaces/user.type'
 
 export const UserSchema = new mongoose.Schema<IUser>(
   {
+    _id: {
+      type: Schema.Types.ObjectId,
+      auto: true
+    },
     username: { type: String, required: true },
     email: { type: String, required: true },
     password: { type: String, required: true },

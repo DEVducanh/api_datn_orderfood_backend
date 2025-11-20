@@ -1,9 +1,12 @@
 import express from 'express'
+import { USER_ROLE } from '~/constants/enum'
 import {
+  getHistoryOrderItemController,
   getOrderItemControler,
   getOrderItemsByUserOrTableController,
   updateSttOderItemControler
 } from '~/controllers/order-item.controler'
+import { authMiddleware, roleMiddleware } from '~/middlewares/auth'
 
 const router = express.Router()
 
@@ -134,15 +137,22 @@ const router = express.Router()
  *         description: Thiếu user_id hoặc table_id
  *       500:
  *         description: Lỗi server
- *
+ */
+
+/**
+ * @swagger
  * /order-item/{id}/status:
  *   patch:
  *     summary: Cập nhật trạng thái món ăn trong đơn hàng
  *     description: |
  *       Cập nhật **trạng thái của từng món ăn** (`OrderItem`) trong đơn hàng.
- *       Quy trình hợp lệ:
- *       `Pending → Processing → Ready → Served`
+ *       Quy trình hợp lệ: `Pending → Processing → Ready → Served`.
  *       Có thể **hủy (Cancelled)** ở bất kỳ giai đoạn nào, trừ khi món đã **Served** hoặc **đã Cancelled**.
+ *
+ *       **Phân quyền:**
+ *       - `CUSTOMER`: chỉ có thể hủy món (`Cancelled`) nếu món chưa Processing.
+ *       - `WAITER`: có thể chuyển từ `Ready → Served` hoặc hủy món.
+ *       - `CHEF`: có thể chuyển trạng thái theo quy trình `Pending → Processing → Ready` và hủy món nếu chưa Served.
  *     tags: [Order Items]
  *     parameters:
  *       - name: id
@@ -178,7 +188,7 @@ const router = express.Router()
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: Order item status updated successfully
+ *                   example: "Order item status updated successfully"
  *                 data:
  *                   type: object
  *                   properties:
@@ -189,15 +199,160 @@ const router = express.Router()
  *                       type: string
  *                       example: "Ready"
  *       400:
- *         description: Trạng thái không hợp lệ
+ *         description: Trạng thái không hợp lệ hoặc chuyển trạng thái không hợp lệ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid status transition"
+ *       401:
+ *         description: Người dùng chưa đăng nhập hoặc token không hợp lệ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized: User not logged in"
+ *       403:
+ *         description: Người dùng không đủ quyền cập nhật trạng thái
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Forbidden: You do not have permission to update this status"
  *       404:
  *         description: Không tìm thấy order item
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Order item not found"
  *       500:
  *         description: Lỗi server khi cập nhật trạng thái
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error"
+ */
+
+/**
+ * @swagger
+ * /order-item/{id}/history:
+ *   get:
+ *     summary: Lấy lịch sử thay đổi của món ăn
+ *     description: Lấy tất cả bản ghi **lịch sử thay đổi** của một `OrderItem` dựa theo `id`. Bao gồm trạng thái cũ, trạng thái mới, và thông tin người thay đổi.
+ *     tags: [Order Items]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID của OrderItem cần lấy lịch sử
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Lấy lịch sử thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       orderItemId:
+ *                         type: string
+ *                         example: "652a8f9b1234567890abcd12"
+ *                       status:
+ *                         type: string
+ *                         example: "PROCESSING"
+ *                       changedBy:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: "652a8f9b1234567890abcd34"
+ *                           name:
+ *                             type: string
+ *                             example: "Nguyen Van A"
+ *                           role:
+ *                             type: number
+ *                             example: 2
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-11-20T12:34:56.789Z"
+ *       400:
+ *         description: Thiếu ID của OrderItem
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Thiếu orderItemId"
+ *       500:
+ *         description: Lỗi server khi lấy lịch sử
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Lỗi khi lấy lịch sử món ăn"
  */
 
 router.get('/order/:orderId', getOrderItemControler)
 router.get('/by-user-or-table', getOrderItemsByUserOrTableController)
-router.patch('/:id/status', updateSttOderItemControler)
+router.get('/:id/history', authMiddleware, getHistoryOrderItemController)
+router.patch(
+  '/:id/status',
+  authMiddleware,
+  roleMiddleware([USER_ROLE.ADMIN, USER_ROLE.CHEF, USER_ROLE.WAITER]),
+  updateSttOderItemControler
+)
 
 export default router
