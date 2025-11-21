@@ -6,9 +6,9 @@ import {
   cancelUserOrderService,
   createOrderService,
   deleteOrderService,
-  getAllOrderByTableService,
   getAllOrderService,
   getDetailOrderByTableIdService,
+  getOrderByTableService,
   updateOrderService,
   updateOrderStatusService
 } from '~/services/order.service'
@@ -34,7 +34,6 @@ export const getAllOrderControler = async (req: Request, res: Response) => {
 export const getDetailOrderByTableIdController = async (req: Request, res: Response) => {
   try {
     const { tableId } = req.params
-
     const order = await getDetailOrderByTableIdService(tableId)
 
     if (!order) {
@@ -138,7 +137,7 @@ export const checkoutCartController = async (req: Request, res: Response) => {
   }
 }
 
-export const getAllOrderByTableController = async (req: Request, res: Response) => {
+export const getOrderByTableController = async (req: Request, res: Response) => {
   try {
     const { tableId } = req.params
     const { userId } = req.query as { userId?: string }
@@ -149,8 +148,10 @@ export const getAllOrderByTableController = async (req: Request, res: Response) 
         message: 'tableId không hợp lệ'
       })
     }
+    console.log('table', tableId)
+    console.log('user', userId)
 
-    const result = await getAllOrderByTableService(tableId, userId)
+    const result = await getOrderByTableService(tableId, userId)
     res.status(result.success ? 200 : 400).json(result)
   } catch (error: any) {
     res.status(500).json({

@@ -112,23 +112,45 @@ export const getDetailInvoicesService = async (id: string) => {
   }
 }
 
-export const createInvoiceService = async (payload: { order_ids: string[]; method?: string }) => {
+export const createInvoiceService = async (payload: { order_id: string; method?: string }) => {
   try {
-    const orders = await Order.find({
-      _id: { $in: payload.order_ids },
+    const order = await Order.findOne({
+      _id: payload.order_id,
       status: ORDER_STATUS.COMPLETED
     })
 
-    if (!orders.length) {
+    if (!order) {
       return { success: false, message: 'Không có order COMPLETED nào' }
     }
 
-    const totalAmount = orders.reduce((sum, o) => sum + o?.total_price!, 0)
+    const servedItems = await OrderItem.find({
+      order_id: order._id,
+      status: 'Served'
+    })
+
+    if (servedItems.length === 0) {
+      return { success: false, message: 'Order chưa có món nào được served' }
+    }
+
+    const invoiceItemsMap: Record<string, { dish_id: string; quantity: number; total_price: number }> = {}
+
+    servedItems.forEach((item) => {
+      const key = item.dish_id.toString()
+      if (!invoiceItemsMap[key]) {
+        invoiceItemsMap[key] = { dish_id: key, quantity: 0, total_price: 0 }
+      }
+      invoiceItemsMap[key].quantity += item.quantity
+      invoiceItemsMap[key].total_price += item.price * item.quantity
+    })
+
+    const invoiceItems = Object.values(invoiceItemsMap)
+
+    const totalAmount = order.total_price
 
     const newInvoice = new Invoices({
-      order_id: orders.map((o) => o._id),
-      user_id: orders[0].user_id,
-      table_id: orders[0].table_id,
+      order_id: order._id,
+      user_id: order.user_id,
+      table_id: order.table_id,
       total_amount: totalAmount,
       status: STATUS_INVOICES.UNPAID,
       created_at: new Date(),
@@ -154,7 +176,7 @@ export const createInvoiceService = async (payload: { order_ids: string[]; metho
 
     const newTransaction = new Transactions({
       payment_id: savedPayment._id,
-      user_id: orders[0].user_id,
+      user_id: order.user_id,
       invoices_id: savedInvoice._id,
       type: payload.method || 'Cash',
       amount_paid: totalAmount,
@@ -185,8 +207,6 @@ export const createInvoiceService = async (payload: { order_ids: string[]; metho
 }
 
 export const updateInvoicePayment = async (invoicesId: any, method: string) => {
-  console.log(invoicesId)
-
   const invoice = await Invoices.findById(invoicesId)
   if (!invoice) {
     return { success: false, message: 'Invoice không tồn tại' }
