@@ -2,6 +2,7 @@ import { ORDER_ITEM_STATUS, ORDER_STATUS, TABLE_STATUS } from '~/constants/enum'
 import { Cart_Item, Cart } from '../models/cart.model'
 import Order from '../models/order.model'
 import OrderItem from '../models/order-item.model'
+import Invoices from '../models/invoices.model'
 import Dish from '../models/dish.model'
 import Table from '../models/table.model'
 import { IDishes } from '~/interfaces/dish.type'
@@ -134,19 +135,25 @@ export const checkoutCartService = async (user_id: string, table_id: string) => 
     const cartItems = await Cart_Item.find({ cart_id: cart._id })
     if (cartItems.length === 0) throw new Error('Cart is empty')
 
-    // Tính tổng tiền
     const total_price = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
-    // Tạo đơn hàng chính
-    const order = await Order.create({
+    let order = await Order.findOne({
       user_id,
       table_id,
-      total_price,
-      status: ORDER_STATUS.PENDING,
-      created_at: new Date()
+      status: ORDER_STATUS.PENDING
     })
+    console.log(order)
 
-    // Tạo danh sách order_items tương ứng
+    if (!order) {
+      order = await Order.create({
+        user_id,
+        table_id,
+        total_price,
+        status: ORDER_STATUS.PENDING,
+        created_at: new Date()
+      })
+    }
+
     const orderItemsData = cartItems.map((item) => ({
       order_id: order._id,
       dish_id: item.dish_id,
@@ -159,17 +166,22 @@ export const checkoutCartService = async (user_id: string, table_id: string) => 
 
     await OrderItem.insertMany(orderItemsData)
 
+    const totalPrice = await OrderItem.aggregate([
+      { $match: { order_id: order._id } },
+      { $group: { _id: null, total: { $sum: '$subtotal' } } }
+    ])
+
+    order.total_price = totalPrice[0]?.total || 0
+    await order.save()
+
     await Table.findByIdAndUpdate(table_id, { status: TABLE_STATUS.OCCUPIED })
 
-    // Xóa giỏ hàng sau khi đặt hàng
     await Cart_Item.deleteMany({ cart_id: cart._id })
     cart.total_price = 0
     await cart.save()
 
-    // Populate dữ liệu để trả về đầy đủ
     const orderWithItems = await OrderItem.find({ order_id: order._id }).populate('dish_id', 'dish_name imageUrl price')
 
-    // Format dữ liệu đẹp
     const formattedItems = orderWithItems.map((item) => ({
       dish_name: (item.dish_id as any)?.dish_name,
       image: (item.dish_id as any)?.imageUrl || null,

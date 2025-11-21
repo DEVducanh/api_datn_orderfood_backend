@@ -156,24 +156,26 @@ export const deleteOrderService = async (id: string) => {
   }
 }
 
-export const getAllOrderByTableService = async (tableId: string, userId?: string) => {
+export const getOrderByTableService = async (tableId: string, userId?: string) => {
   try {
     const filter: any = { table_id: new mongoose.Types.ObjectId(tableId) }
     if (userId) filter.user_id = userId
 
-    const invoicedOrders = await Invoices.find().distinct('order_id')
+    const unpaidOrderIds = await Invoices.find({ status: 'unpaid' }).distinct('order_id')
 
-    // Lọc ra các order chưa có trong Invoice
-    const orders = await Order.find({
-      ...filter,
-      _id: { $nin: invoicedOrders }
-    })
-      .select('-orderItems')
-      .lean()
+    const allInvoiceOrderIds = await Invoices.find().distinct('order_id')
+
+    filter.$or = [
+      { _id: { $nin: allInvoiceOrderIds.map((id) => new mongoose.Types.ObjectId(id)) } },
+      { _id: { $in: unpaidOrderIds.map((id) => new mongoose.Types.ObjectId(id)) } }
+    ]
+
+    const order = await Order.findOne(filter).sort({ createdAt: -1 })
+    console.log(order)
 
     return {
       success: true,
-      data: orders
+      data: order
     }
   } catch (error) {
     throw new Error('Cannot get all order !!')

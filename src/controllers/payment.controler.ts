@@ -5,14 +5,11 @@ import moment from 'moment'
 import { getDetailInvoicesService, updateInvoicePayment } from '~/services/invoices.service'
 import Invoices from '../models/invoices.model'
 import { STATUS_INVOICES, STATUS_PAYMENTS } from '~/constants/enum'
-import { toObjectId } from './../utils/toObjectId'
 
 function sortObject(obj: any) {
   let sorted: Record<string, any> = {}
   let str = []
   let key
-
-  console.log('obj', obj)
 
   for (key in obj) {
     console.log('key', key)
@@ -33,9 +30,6 @@ export const createPaymentUrl = async (req: Request, res: Response, next: NextFu
     let invoicesId = req.body.invoicesId
     let amount: number = req.body.amount
     let bankCode: string = req.body.bankCode
-
-    console.log('id', invoicesId)
-    console.log('amuont', amount)
 
     if (!invoicesId || !amount) {
       return res.status(400).json({ message: 'Thiếu thông tin hóa đơn hoặc số tiền' })
@@ -93,8 +87,6 @@ export const createPaymentUrl = async (req: Request, res: Response, next: NextFu
     vnp_Params['vnp_SecureHash'] = signed
     vnpUrl += '?' + qs.stringify(vnp_Params, { encode: false })
 
-    console.log(vnpUrl)
-
     res.status(200).json({ success: true, vnpUrl })
   } catch (error) {
     next(error)
@@ -108,8 +100,6 @@ export const vnpayReturn = (req: Request, res: Response, next: NextFunction) => 
 
     delete vnp_Params['vnp_SecureHash']
     delete vnp_Params['vnp_SecureHashType']
-
-    console.log('vnparram', vnp_Params)
 
     vnp_Params = sortObject(vnp_Params)
 
@@ -150,7 +140,6 @@ export const vnpIpn = async (req: Request, res: Response, next: NextFunction) =>
     let hmac = crypto.createHmac('sha512', secretKey)
     let signed = hmac.update(new Buffer(signData, 'utf-8')).digest('hex')
 
-    console.log('Invoice ID from VNPay:', invoicesId)
     const invoice = await Invoices.findById(invoicesId)
 
     let paymentStatus = STATUS_INVOICES.UNPAID

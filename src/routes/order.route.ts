@@ -4,9 +4,9 @@ import {
   cancelUserOrderController,
   createOrderControler,
   deleteOrderControler,
-  getAllOrderByTableController,
   getAllOrderControler,
   getDetailOrderByTableIdController,
+  getOrderByTableController,
   updateOrderControler,
   updateOrderStatusController
 } from '~/controllers/order.controler'
@@ -272,11 +272,11 @@ const router = express.Router()
 
 router.get('/', getAllOrderControler)
 router.get('/:tableId', getDetailOrderByTableIdController)
-router.get('/by-table/:tableId', getAllOrderByTableController)
+router.get('/by-table/:tableId', getOrderByTableController)
 router.post('/', createOrderControler)
 router.patch('/:id', updateOrderControler)
-router.delete('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), deleteOrderControler)
 router.patch('/:id/status', updateOrderStatusController)
 router.patch('/:id/cancel', cancelUserOrderController)
+router.delete('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), deleteOrderControler)
 
 export default router
