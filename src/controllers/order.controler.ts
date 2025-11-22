@@ -3,7 +3,6 @@ import mongoose from 'mongoose'
 import { DEFAULT_MESSAGE } from '~/constants/message'
 import { checkoutCartService } from '~/services/cart.service'
 import {
-  cancelUserOrderService,
   createOrderService,
   deleteOrderService,
   getAllOrderService,
@@ -118,7 +117,7 @@ export const checkoutCartController = async (req: Request, res: Response) => {
     if (!user_id || !table_id) {
       return res.status(400).json({
         success: false,
-        message: 'user_id and table_id are required'
+        message: 'Yêu cầu user_id và table_id'
       })
     }
 
@@ -126,13 +125,13 @@ export const checkoutCartController = async (req: Request, res: Response) => {
 
     res.status(201).json({
       success: true,
-      message: 'Order created successfully',
+      message: 'Order Tạo thành công',
       data: order
     })
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to checkout cart'
+      message: error.message || 'Thất bại khi tạo order'
     })
   }
 }
@@ -145,11 +144,9 @@ export const getOrderByTableController = async (req: Request, res: Response) => 
     if (!mongoose.Types.ObjectId.isValid(tableId)) {
       return res.status(400).json({
         success: false,
-        message: 'tableId không hợp lệ'
+        message: 'TableId không hợp lệ'
       })
     }
-    console.log('table', tableId)
-    console.log('user', userId)
 
     const result = await getOrderByTableService(tableId, userId)
     res.status(result.success ? 200 : 400).json(result)
@@ -158,15 +155,5 @@ export const getOrderByTableController = async (req: Request, res: Response) => 
       success: false,
       message: error.message || 'Server error'
     })
-  }
-}
-
-export const cancelUserOrderController = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params
-    const result = await cancelUserOrderService(id)
-    res.status(200).json({ message: 'Order canceled', ...result })
-  } catch (error: any) {
-    res.status(400).json({ message: error.message })
   }
 }

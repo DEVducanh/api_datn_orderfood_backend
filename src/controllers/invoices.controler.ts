@@ -79,9 +79,11 @@ export const getInvoiceByOrderId = async (req: Request, res: Response) => {
 
 export const getPaidInvoiceByTableAndUserController = async (req: Request, res: Response) => {
   try {
-    const { tableId, userId } = req.params
+    const userId = req.user?.id
+    const { tableId } = req.params
 
     if (!tableId) return res.status(400).json({ success: false, message: 'Thiếu tableId' })
+    if (!userId) return res.status(400).json({ success: false, message: 'Thiếu UserId' })
 
     const result = await getPaidInvoiceByTableAndUserService(tableId, userId)
 

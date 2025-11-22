@@ -1,6 +1,7 @@
 import express from 'express'
 import { USER_ROLE } from '~/constants/enum'
 import {
+  cancelOrderItemController,
   getHistoryOrderItemController,
   getOrderItemControler,
   getOrderItemsByUserOrTableController,
@@ -345,8 +346,32 @@ const router = express.Router()
  *                   example: "Lỗi khi lấy lịch sử món ăn"
  */
 
+/**
+ * @swagger
+ * /order-item/{id}/cancel:
+ *   patch:
+ *     summary: Hủy Món ăn theo ID
+ *     tags: [Order Items]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của Món ăn cần hủy
+ *     responses:
+ *       200:
+ *         description: Hủy thành công
+ *       400:
+ *         description: Yêu cầu không hợp lệ
+ *       404:
+ *         description: Không tìm thấy Món ăn
+ *       500:
+ *         description: Lỗi server
+ */
 router.get('/order/:orderId', getOrderItemControler)
 router.get('/by-user-or-table', getOrderItemsByUserOrTableController)
+router.patch('/:id/cancel', cancelOrderItemController)
 router.get('/:id/history', authMiddleware, getHistoryOrderItemController)
 router.patch(
   '/:id/status',

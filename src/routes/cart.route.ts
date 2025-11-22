@@ -7,6 +7,7 @@ import {
   updateQuantiCartItemControler
 } from '~/controllers/cart.controler'
 import { checkoutCartController } from '~/controllers/order.controler'
+import { authMiddleware } from '~/middlewares/auth'
 
 const router = express.Router()
 
@@ -43,7 +44,7 @@ const router = express.Router()
  *       200:
  *         description: Thêm sản phẩm thành công và trả về giỏ hàng mới nhất
  *
- * /cart/cart-item/{table_id}/{user_id}:
+ * /cart/cart-item/{table_id}:
  *   get:
  *     summary: Lấy giỏ hàng theo mã bàn và người dùng
  *     description: FE gọi API này để hiển thị danh sách món trong giỏ của bàn.
@@ -54,13 +55,6 @@ const router = express.Router()
  *         required: true
  *         schema:
  *           type: string
- *           example: "A01"
- *       - in: path
- *         name: user_id
- *         required: true
- *         schema:
- *           type: string
- *           example: "671ac9..."
  *     responses:
  *       200:
  *         description: Trả về chi tiết giỏ hàng (gồm danh sách sản phẩm, số lượng, giá)
@@ -131,9 +125,9 @@ const router = express.Router()
  */
 
 router.post('/', createCartController)
-router.get('/cart-item/:table_id/:user_id', getOneCartController)
-router.post('/add-item', addToCartControler)
-router.post('/checkout', checkoutCartController)
+router.get('/cart-item/:table_id', authMiddleware, getOneCartController)
+router.post('/add-item', authMiddleware, addToCartControler)
+router.post('/checkout', authMiddleware, checkoutCartController)
 router.patch('/:cart_item_id/quantity', updateQuantiCartItemControler)
 router.delete('/item/:cart_item_id', removeCartItemController)
 export default router

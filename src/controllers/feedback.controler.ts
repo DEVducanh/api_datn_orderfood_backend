@@ -26,7 +26,8 @@ export const getAllFeedBackControler = async (req: Request, res: Response) => {
 
 export const createFeedBackControler = async (req: Request, res: Response) => {
   try {
-    const { user_id, order_id, dish_id, type, rating, content, image } = req.body
+    const user_id = (req as any).user.id
+    const { order_id, dish_id, type, rating, content, image } = req.body
 
     const newFeedBack = await createFeedBackService(user_id, order_id, dish_id, type, rating, content, image)
 
@@ -131,9 +132,13 @@ export const createFeedbackResponseController = async (req: Request, res: Respon
   try {
     const { feedback_id } = req.params
     const { content } = req.body
-    const user = (req as any).user
+    const user_id = req.user?.id
 
-    const response = await createFeedbackResponseService(feedback_id, user.id, content)
+    if (!user_id) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' })
+    }
+
+    const response = await createFeedbackResponseService(feedback_id, user_id, content)
 
     res.status(201).json({
       success: true,

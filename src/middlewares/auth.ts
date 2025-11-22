@@ -1,29 +1,33 @@
 // các file chứa các hàm xử lý middleware, như validate, check token,
 
+import ObjectID from 'bson-objectid'
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
+import { v4 as uuidv4 } from 'uuid'
 
 interface JwtPayload {
   id: string
-  role: string
+  role: number
+  type: 'user' | 'guest'
+  username?: string
 }
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers['authorization']
-  if (!authHeader) {
-    return res.status(401).json({ message: 'Bạn chưa đăng nhập' })
-  }
+  let token = authHeader?.split(' ')[1]
 
-  const token = authHeader.split(' ')[1]
   if (!token) {
-    return res.status(401).json({ message: 'Invalid token format' })
+    const guestId = ObjectID().toHexString()
+    token = jwt.sign({ id: guestId, type: 'guest', role: 0 }, process.env.JWT_SECRET!, { expiresIn: '7d' })
+    res.setHeader('x-guest-token', token)
+    console.log('Created guest token:', token)
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload
-    ;(req as any).user = decoded // gắn user vào req
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload
+    req.user = { id: decoded.id, role: decoded.role }
     next()
   } catch (error) {
-    return res.status(401).json({ message: 'Token không hợp lệ hoặc hết hạn' })
+    return res.status(401).json({ message: 'Invalid token' })
   }
 }
 
