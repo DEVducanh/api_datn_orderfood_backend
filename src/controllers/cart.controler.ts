@@ -10,7 +10,8 @@ import {
 
 export const createCartController = async (req: Request, res: Response) => {
   try {
-    const { user_id, table_id, session_id } = req.body
+    const user_id = req.user?.id
+    const { table_id } = req.body
 
     if (!user_id || !table_id) {
       return res.status(400).json({
@@ -20,7 +21,7 @@ export const createCartController = async (req: Request, res: Response) => {
     }
 
     // Gọi service
-    const cart = await createCartService(user_id, session_id, table_id)
+    const cart = await createCartService(user_id, table_id)
 
     return res.status(200).json({
       success: true,
@@ -38,8 +39,8 @@ export const createCartController = async (req: Request, res: Response) => {
 
 export const addToCartControler = async (req: Request, res: Response) => {
   try {
-    const { user_id, session_id, table_id, dish_id, quantity } = req.body
-
+    const user_id = req.user?.id
+    const { table_id, dish_id, quantity } = req.body
     // Kiểm tra dữ liệu đầu vào
     if (!table_id || !dish_id || !quantity) {
       return res.status(400).json({
@@ -47,9 +48,18 @@ export const addToCartControler = async (req: Request, res: Response) => {
         message: 'Missing table_id, dish_id or quantity'
       })
     }
+    if (!user_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID not found'
+      })
+    }
+
+    console.log(user_id)
 
     // Gọi service xử lý logic
-    const result = await addToCartService(user_id, session_id, table_id, dish_id, quantity)
+    const result = await addToCartService(user_id, table_id, dish_id, quantity)
+    console.log('result', result)
 
     return res.status(200).json({
       success: true,
@@ -67,7 +77,15 @@ export const addToCartControler = async (req: Request, res: Response) => {
 
 export const getOneCartController = async (req: Request, res: Response) => {
   try {
-    const { table_id, user_id } = req.params
+    const user_id = req.user?.id
+    const table_id = req.params.table_id
+
+    if (!user_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID not found'
+      })
+    }
 
     const cartData = await getOneCartService(table_id, user_id)
 

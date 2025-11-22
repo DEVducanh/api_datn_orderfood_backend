@@ -1,7 +1,6 @@
 import express from 'express'
 import { USER_ROLE } from '~/constants/enum'
 import {
-  cancelUserOrderController,
   createOrderControler,
   deleteOrderControler,
   getAllOrderControler,
@@ -167,7 +166,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /orders/by-table/{tableId}:
+ * /orders/table/{tableId}:
  *   get:
  *     summary: Lấy danh sách tất cả order theo bàn (và user nếu có)
  *     tags: [Orders]
@@ -225,58 +224,12 @@ const router = express.Router()
  *         description: Lỗi server
  */
 
-/**
- * @swagger
- * /orders/{id}/cancel:
- *   patch:
- *     summary: Hủy đơn hàng của user (chỉ khi Pending)
- *     tags:
- *       - Orders
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID của đơn hàng cần hủy
- *     responses:
- *       200:
- *         description: Hủy đơn hàng thành công
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Order canceled
- *                 updatedOrder:
- *                   type: object
- *                   description: Đơn hàng đã cập nhật
- *                 updatedItemsResult:
- *                   type: object
- *                   description: Kết quả update các order item
- *       400:
- *         description: Lỗi request, ví dụ order không tồn tại hoặc không phải Pending
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Đầu bếp đang làm không thể hủy
- *       500:
- *         description: Lỗi server
- */
-
 router.get('/', getAllOrderControler)
 router.get('/:tableId', getDetailOrderByTableIdController)
-router.get('/by-table/:tableId', getOrderByTableController)
+router.get('/table/:tableId', getOrderByTableController)
 router.post('/', createOrderControler)
 router.patch('/:id', updateOrderControler)
 router.patch('/:id/status', updateOrderStatusController)
-router.patch('/:id/cancel', cancelUserOrderController)
 router.delete('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), deleteOrderControler)
 
 export default router

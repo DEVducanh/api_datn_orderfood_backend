@@ -77,7 +77,7 @@ export const getDetailInvoicesService = async (id: string) => {
       status: invoice.status,
       created_at: invoice.created_at,
       updated_at: invoice.updated_at,
-      order_item: order_items,
+      order_items: order_items,
 
       payment: payment
         ? {
@@ -334,8 +334,6 @@ export const getPaidInvoiceByTableAndUserService = async (tableId: string, userI
 
     return { invoice, orderItems }
   } catch (error) {
-    console.log('aaaaaa')
-
     throw error
   }
 }

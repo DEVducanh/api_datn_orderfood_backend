@@ -181,22 +181,3 @@ export const getOrderByTableService = async (tableId: string, userId?: string) =
     throw new Error('Cannot get all order !!')
   }
 }
-
-export const cancelUserOrderService = async (id: string) => {
-  if (!mongoose.Types.ObjectId.isValid(id)) throw new Error('Invalid order ID')
-
-  const order = await Order.findById(id)
-  if (!order) throw new Error('Order Không tìm thấy')
-  if (order.status !== ORDER_STATUS.PENDING) throw new Error('Đầu bếp đã làm không thể hủy')
-
-  order.status = ORDER_STATUS.CANCELED
-  order.updatedAt = new Date().toISOString()
-  const updatedOrder = await order.save()
-
-  const updatedItemsResult = await OrderItem.updateMany(
-    { order_id: new mongoose.Types.ObjectId(id) },
-    { $set: { status: ORDER_ITEM_STATUS.CANCELED, updatedAt: new Date() } }
-  )
-
-  return { updatedOrder, updatedItemsResult }
-}

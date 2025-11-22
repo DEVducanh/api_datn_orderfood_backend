@@ -6,6 +6,7 @@ import {
   getInvoiceByOrderId,
   getPaidInvoiceByTableAndUserController
 } from '~/controllers/invoices.controler'
+import { authMiddleware } from '~/middlewares/auth'
 
 const router = express.Router()
 
@@ -238,7 +239,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /invoices/by-order/{orderId}:
+ * /invoices/order/{orderId}:
  *   get:
  *     summary: Lấy chi tiết hóa đơn theo order ID
  *     tags: [Invoices]
@@ -343,9 +344,9 @@ const router = express.Router()
 
 /**
  * @swagger
- * /invoices/{tableId}/{userId}:
+ * /invoices/{tableId}:
  *   get:
- *     summary: Lấy hóa đơn đã thanh toán theo bàn và user
+ *     summary: Lấy hóa đơn đã thanh toán theo bàn và user có trong token
  *     tags: [Invoices]
  *     parameters:
  *       - in: path
@@ -354,12 +355,6 @@ const router = express.Router()
  *         schema:
  *           type: string
  *         description: ID của bàn
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: string
- *         description: ID của người dùng
  *     responses:
  *       200:
  *         description: Lấy hóa đơn thành công
@@ -386,8 +381,8 @@ const router = express.Router()
 
 router.get('/', getAllInvoiceController)
 router.get('/:id', getDetailInvoiceControler)
-router.post('/', createInvoiceController)
-router.get('/by-order/:orderId', getInvoiceByOrderId)
-router.get('/:tableId/:userId', getPaidInvoiceByTableAndUserController)
+router.post('/', authMiddleware, createInvoiceController)
+router.get('/order/:orderId', authMiddleware, getInvoiceByOrderId)
+router.get('/:tableId', getPaidInvoiceByTableAndUserController)
 
 export default router

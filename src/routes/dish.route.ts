@@ -152,7 +152,7 @@ const router = express.Router()
  *         description: Xóa thành công
  */
 
-router.get('/', getAllDishControler)
+router.get('/', authMiddleware, getAllDishControler)
 router.get('/:id', getOneDishControler)
 router.post('/', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), createDishControler)
 router.patch('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), updateDishControler)

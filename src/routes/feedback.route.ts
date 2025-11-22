@@ -315,7 +315,7 @@ router.post(
 )
 router.delete('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), deleteFeedbackController)
 router.get('/response/:id', getResponseDetailController)
-router.get('/dish/:dish_id', getFeedBackByDishIdControler)
-router.post('/', createFeedBackControler)
+router.get('/dish/:dish_id', authMiddleware, getFeedBackByDishIdControler)
+router.post('/', authMiddleware, createFeedBackControler)
 
 export default router

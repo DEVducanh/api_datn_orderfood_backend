@@ -184,3 +184,14 @@ export const getHistoryOrderItem = async (id: string) => {
     }
   }
 }
+
+export const cancelOrderItemService = async (id: string) => {
+  const orderItem = await OrderItem.findById(id)
+  if (!orderItem) throw new Error('Order Item Không tìm thấy')
+  if (orderItem.status !== ORDER_ITEM_STATUS.PENDING) throw new Error('Đầu bếp đã làm không thể hủy')
+
+  orderItem.status = ORDER_ITEM_STATUS.CANCELED
+  const newOrderItem = await orderItem.save()
+
+  return newOrderItem
+}

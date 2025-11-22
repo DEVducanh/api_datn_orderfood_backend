@@ -13,12 +13,10 @@ import invoicesRouter from './routes/invoice.route'
 import paymentRouter from './routes/payment.route'
 import cartRouter from './routes/cart.route'
 import feedbackRouter from './routes/feedback.route'
-import qrRouter from './routes/qr.route'
 
 import swaggerUi from 'swagger-ui-express'
 import swaggerJSDoc from 'swagger-jsdoc'
 import cors from 'cors'
-import { sessionConfig } from './config/session'
 
 const options: swaggerJSDoc.Options = {
   definition: {
@@ -61,12 +59,11 @@ app.use(
   })
 )
 app.use(express.json())
-app.use(sessionConfig)
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiSpecification))
 
 // ...Router
 
-app.use('/qr', qrRouter)
 app.use('/auth', authRouter)
 app.use('/users', userRouter)
 
