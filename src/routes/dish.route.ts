@@ -153,7 +153,7 @@ const router = express.Router()
  */
 
 router.get('/', authMiddleware, getAllDishControler)
-router.get('/:id', getOneDishControler)
+router.get('/:id', authMiddleware, getOneDishControler)
 router.post('/', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), createDishControler)
 router.patch('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), updateDishControler)
 router.delete('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), deleteDishControler)
