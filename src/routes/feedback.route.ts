@@ -26,9 +26,6 @@ const router = express.Router()
  *         _id:
  *           type: string
  *           description: ID của feedback
- *         user_id:
- *           type: string
- *           description: ID người dùng gửi feedback
  *         order_id:
  *           type: string
  *           description: ID của đơn hàng chứa món ăn được đánh giá
@@ -302,9 +299,9 @@ const router = express.Router()
  *               $ref: '#/components/schemas/FeedbackResponse'
  */
 
-router.get('/', getAllFeedBackControler)
-router.get('/:id', getDetailFeedbackControler)
-router.get('/:feedback_id/responses', getResponsesByFeedbackController)
+router.get('/', authMiddleware, getAllFeedBackControler)
+router.get('/:id', authMiddleware, getDetailFeedbackControler)
+router.get('/:feedback_id/responses', authMiddleware, getResponsesByFeedbackController)
 router.patch('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), updateFeedbackStatusController)
 
 router.post(

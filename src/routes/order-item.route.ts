@@ -75,31 +75,18 @@ const router = express.Router()
  *       500:
  *         description: Lỗi server
  *
- * /order-item/by-user-or-table:
+ * /order-item/table:
  *   get:
- *     summary: Lấy danh sách món ăn theo user_id hoặc table_id
+ *     summary: Lấy danh sách món ăn theo table_id
  *     description: |
  *       API linh hoạt cho phép lấy danh sách món ăn đã gọi:
- *       - Nếu **khách đăng nhập**, truyền `user_id`.
- *       - Nếu **khách tại bàn**, truyền `table_id`.
- *       - Chỉ cần truyền **1 trong 2 tham số** trong query string.
- *       Ví dụ:
- *       - `/order-item/by-user-or-table?user_id=671fc9c2d9993b183f37b6f3`
- *       - `/order-item/by-user-or-table?table_id=671fc9c2d9993b183f37b6f9`
  *     tags: [Order Items]
  *     parameters:
- *       - in: query
- *         name: user_id
- *         schema:
- *           type: string
- *         description: ID người dùng (nếu là khách đăng nhập)
- *         example: "671fc9c2d9993b183f37b6f3"
  *       - in: query
  *         name: table_id
  *         schema:
  *           type: string
- *         description: ID bàn (nếu là khách không đăng nhập)
- *         example: "671fc9c2d9993b183f37b6f9"
+ *         description: ID bàn
  *     responses:
  *       200:
  *         description: Lấy danh sách món ăn đã đặt thành công
@@ -369,9 +356,9 @@ const router = express.Router()
  *       500:
  *         description: Lỗi server
  */
-router.get('/order/:orderId', getOrderItemControler)
-router.get('/by-user-or-table', getOrderItemsByUserOrTableController)
-router.patch('/:id/cancel', cancelOrderItemController)
+router.get('/order/:orderId', authMiddleware, getOrderItemControler)
+router.get('/table', authMiddleware, getOrderItemsByUserOrTableController)
+router.patch('/:id/cancel', authMiddleware, cancelOrderItemController)
 router.get('/:id/history', authMiddleware, getHistoryOrderItemController)
 router.patch(
   '/:id/status',

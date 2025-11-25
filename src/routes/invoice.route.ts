@@ -383,6 +383,6 @@ router.get('/', getAllInvoiceController)
 router.get('/:id', getDetailInvoiceControler)
 router.post('/', authMiddleware, createInvoiceController)
 router.get('/order/:orderId', authMiddleware, getInvoiceByOrderId)
-router.get('/:tableId', getPaidInvoiceByTableAndUserController)
+router.get('/:tableId', authMiddleware, getPaidInvoiceByTableAndUserController)
 
 export default router

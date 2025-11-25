@@ -19,7 +19,6 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     const guestId = ObjectID().toHexString()
     token = jwt.sign({ id: guestId, type: 'guest', role: 0 }, process.env.JWT_SECRET!, { expiresIn: '7d' })
     res.setHeader('x-guest-token', token)
-    console.log('Created guest token:', token)
   }
 
   try {

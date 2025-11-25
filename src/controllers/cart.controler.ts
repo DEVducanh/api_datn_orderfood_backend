@@ -55,8 +55,6 @@ export const addToCartControler = async (req: Request, res: Response) => {
       })
     }
 
-    console.log(user_id)
-
     // Gọi service xử lý logic
     const result = await addToCartService(user_id, table_id, dish_id, quantity)
     console.log('result', result)
