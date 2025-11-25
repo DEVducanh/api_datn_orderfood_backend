@@ -10,7 +10,7 @@ const connectDB = async (): Promise<void> => {
     await mongoose.connect(uri)
   } catch (error) {
     console.error('MongoDB connection error:', error)
-    process.exit(1) // dừng app nếu không connect được
+    process.exit(1)
   }
 }
 

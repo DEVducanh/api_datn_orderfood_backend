@@ -51,7 +51,17 @@ export const getDetailOrderByTableIdController = async (req: Request, res: Respo
 
 export const createOrderControler = async (req: Request, res: Response) => {
   try {
-    const data = await createOrderService(req.body)
+    const user_id = req.user?.id
+
+    if (!user_id) {
+      return res.status(401).json({ message: 'Missing user id' })
+    }
+
+    const orderData = {
+      ...req.body,
+      user_id: user_id
+    }
+    const data = await createOrderService(orderData)
     return res.status(200).json({
       message: DEFAULT_MESSAGE.DEFAULT_SUCCESS,
       data
@@ -112,7 +122,8 @@ export const deleteOrderControler = async (req: Request, res: Response) => {
 
 export const checkoutCartController = async (req: Request, res: Response) => {
   try {
-    const { user_id, table_id } = req.body
+    const user_id = req.user?.id
+    const { table_id } = req.body
 
     if (!user_id || !table_id) {
       return res.status(400).json({
@@ -139,7 +150,7 @@ export const checkoutCartController = async (req: Request, res: Response) => {
 export const getOrderByTableController = async (req: Request, res: Response) => {
   try {
     const { tableId } = req.params
-    const { userId } = req.query as { userId?: string }
+    const user_id = req.user?.id
 
     if (!mongoose.Types.ObjectId.isValid(tableId)) {
       return res.status(400).json({
@@ -148,7 +159,7 @@ export const getOrderByTableController = async (req: Request, res: Response) => 
       })
     }
 
-    const result = await getOrderByTableService(tableId, userId)
+    const result = await getOrderByTableService(tableId, user_id)
     res.status(result.success ? 200 : 400).json(result)
   } catch (error: any) {
     res.status(500).json({

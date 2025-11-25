@@ -29,8 +29,6 @@ const router = express.Router()
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
  *               table_id:
  *                 type: string
  *                 example: "A01"
@@ -87,9 +85,6 @@ const router = express.Router()
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
- *                 example: "A01"
  *               table_id:
  *                 type: string
  *                 example: "cash"
@@ -128,6 +123,6 @@ router.post('/', createCartController)
 router.get('/cart-item/:table_id', authMiddleware, getOneCartController)
 router.post('/add-item', authMiddleware, addToCartControler)
 router.post('/checkout', authMiddleware, checkoutCartController)
-router.patch('/:cart_item_id/quantity', updateQuantiCartItemControler)
-router.delete('/item/:cart_item_id', removeCartItemController)
+router.patch('/:cart_item_id/quantity', authMiddleware, updateQuantiCartItemControler)
+router.delete('/item/:cart_item_id', authMiddleware, removeCartItemController)
 export default router
