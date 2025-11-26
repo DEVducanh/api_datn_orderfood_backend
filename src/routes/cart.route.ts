@@ -123,6 +123,6 @@ router.post('/', createCartController)
 router.get('/cart-item/:table_id', authMiddleware, getOneCartController)
 router.post('/add-item', authMiddleware, addToCartControler)
 router.post('/checkout', authMiddleware, checkoutCartController)
-router.patch('/:cart_item_id/quantity', updateQuantiCartItemControler)
-router.delete('/item/:cart_item_id', removeCartItemController)
+router.patch('/:cart_item_id/quantity', authMiddleware, updateQuantiCartItemControler)
+router.delete('/item/:cart_item_id', authMiddleware, removeCartItemController)
 export default router

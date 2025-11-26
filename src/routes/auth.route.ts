@@ -1,8 +1,8 @@
 import express from 'express'
-import { loginController, registerController } from '~/controllers/auth.controler'
+import { loginController, registerController, updateGuestInfo } from '~/controllers/auth.controler'
+import { authMiddleware } from '~/middlewares/auth'
 
 const router = express.Router()
-//commentnttttt
 
 /**
  * @openapi
@@ -121,7 +121,55 @@ const router = express.Router()
  *               $ref: '#/components/schemas/LoginResponse'
  */
 
+/**
+ * @swagger
+ * /auth/guest/update:
+ *   post:
+ *     summary: Cập nhật thông tin guest
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []   # nếu dùng Authorization header, hoặc đổi tên nếu dùng x-guest-token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: "JohnDoe"
+ *               phone:
+ *                 type: string
+ *                 example: "0123456789"
+ *     responses:
+ *       200:
+ *         description: Cập nhật thông tin thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: "123"
+ *                 username:
+ *                   type: string
+ *                   example: "JohnDoe"
+ *                 phone:
+ *                   type: string
+ *                   example: "0123456789"
+ *                 role:
+ *                   type: integer
+ *                   example: 0
+ *       400:
+ *         description: Thông tin gửi lên không hợp lệ
+ *       401:
+ *         description: Không có quyền truy cập / token không hợp lệ
+ */
+
 router.post('/register', registerController)
 router.post('/login', loginController)
+router.post('/guest/update', authMiddleware, updateGuestInfo)
 
 export default router

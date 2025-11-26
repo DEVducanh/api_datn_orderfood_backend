@@ -34,7 +34,6 @@ const router = express.Router()
  *         name: search
  *         schema:
  *           type: string
- *           example: Bàn 4 || ducanh1925
  *         description: tìm kiếm đơn hàng
  *     responses:
  *       200:
@@ -216,10 +215,10 @@ const router = express.Router()
  */
 
 router.get('/', getAllOrderControler)
-router.get('/:tableId', getDetailOrderByTableIdController)
+router.get('/:tableId', authMiddleware, getDetailOrderByTableIdController)
 router.get('/table/:tableId', authMiddleware, getOrderByTableController)
-router.post('/', createOrderControler)
-router.patch('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), updateOrderControler)
+router.post('/', authMiddleware, createOrderControler)
+router.patch('/:id', authMiddleware, updateOrderControler)
 router.patch('/:id/status', authMiddleware, updateOrderStatusController)
 router.delete('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), deleteOrderControler)
 

@@ -299,8 +299,8 @@ const router = express.Router()
  *               $ref: '#/components/schemas/FeedbackResponse'
  */
 
-router.get('/', getAllFeedBackControler)
-router.get('/:id', getDetailFeedbackControler)
+router.get('/', authMiddleware, getAllFeedBackControler)
+router.get('/:id', authMiddleware, getDetailFeedbackControler)
 router.get('/:feedback_id/responses', authMiddleware, getResponsesByFeedbackController)
 router.patch('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), updateFeedbackStatusController)
 
