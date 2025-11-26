@@ -43,7 +43,7 @@ export const updateSttOderItemControler = async (req: Request, res: Response) =>
 
 export const getOrderItemsByUserOrTableController = async (req: Request, res: Response) => {
   try {
-    const user_id = req.query.user_id as string | undefined
+    const user_id = req.user?.id as string | undefined
     const table_id = req.query.table_id as string | undefined
 
     const result = await getOrderItemsByUserOrTableService(user_id, table_id)

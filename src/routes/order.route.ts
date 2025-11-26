@@ -55,9 +55,6 @@ const router = express.Router()
  *               table_id:
  *                 type: string
  *                 example: "6521e5c4b3c7e4a2b9f7a101"
- *               user_id:
- *                 type: string
- *                 example: "6521e5c4b3c7e4a2b9f7a201"
  *               status:
  *                 type: string
  *                 example: "PENDING"
@@ -168,7 +165,7 @@ const router = express.Router()
  * @swagger
  * /orders/table/{tableId}:
  *   get:
- *     summary: Lấy danh sách tất cả order theo bàn (và user nếu có)
+ *     summary: Lấy danh sách tất cả order theo bàn
  *     tags: [Orders]
  *     parameters:
  *       - in: path
@@ -177,12 +174,6 @@ const router = express.Router()
  *           type: string
  *         required: true
  *         description: ID của bàn cần lấy order
- *       - in: query
- *         name: userId
- *         schema:
- *           type: string
- *         required: false
- *         description: ID của người dùng (nếu muốn lọc theo user)
  *     responses:
  *       200:
  *         description: Lấy danh sách order thành công
@@ -226,10 +217,10 @@ const router = express.Router()
 
 router.get('/', getAllOrderControler)
 router.get('/:tableId', getDetailOrderByTableIdController)
-router.get('/table/:tableId', getOrderByTableController)
+router.get('/table/:tableId', authMiddleware, getOrderByTableController)
 router.post('/', createOrderControler)
-router.patch('/:id', updateOrderControler)
-router.patch('/:id/status', updateOrderStatusController)
+router.patch('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), updateOrderControler)
+router.patch('/:id/status', authMiddleware, updateOrderStatusController)
 router.delete('/:id', authMiddleware, roleMiddleware([USER_ROLE.ADMIN]), deleteOrderControler)
 
 export default router

@@ -139,7 +139,7 @@ export const checkoutCartController = async (req: Request, res: Response) => {
 export const getOrderByTableController = async (req: Request, res: Response) => {
   try {
     const { tableId } = req.params
-    const { userId } = req.query as { userId?: string }
+    const userId = req.user?.id
 
     if (!mongoose.Types.ObjectId.isValid(tableId)) {
       return res.status(400).json({

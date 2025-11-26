@@ -29,8 +29,6 @@ const router = express.Router()
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
  *               table_id:
  *                 type: string
  *                 example: "A01"
@@ -87,9 +85,6 @@ const router = express.Router()
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
- *                 example: "A01"
  *               table_id:
  *                 type: string
  *                 example: "cash"
