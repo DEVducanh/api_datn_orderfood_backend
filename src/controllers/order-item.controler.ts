@@ -5,6 +5,7 @@ import {
   getHistoryOrderItem,
   getOrderItemsByUserOrTableService,
   getOrderItemService,
+  updateManyOrderItemsService,
   updateSttOrderItemService
 } from '~/services/order-item.service'
 
@@ -38,6 +39,26 @@ export const updateSttOderItemControler = async (req: Request, res: Response) =>
   } catch (error) {
     console.log(error)
     return res.status(400).json({ message: DEFAULT_MESSAGE.DEFAULT_ERROR })
+  }
+}
+
+export const updateManyOrderItemsController = async (req: Request, res: Response) => {
+  try {
+    const { orderId, itemIds, newStatus } = req.body
+    console.log(orderId)
+
+    const user = req.user as { id: string; role: number }
+
+    console.log(user)
+
+    const result = await updateManyOrderItemsService(orderId, itemIds, newStatus, user)
+
+    return res.status(result.success ? 200 : 400).json(result)
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Lỗi hệ thống'
+    })
   }
 }
 
