@@ -136,8 +136,6 @@ export const updateOrderStatusService = async (id: string, status: string) => {
       updatedItemsResult = await OrderItem.updateMany(filter, updateDoc)
     }
 
-    console.log(updatedItemsResult)
-
     return {
       updatedOrder,
       updatedItemsResult

@@ -379,8 +379,8 @@ const router = express.Router()
  *         description: Lỗi server
  */
 
-router.get('/', getAllInvoiceController)
-router.get('/:id', getDetailInvoiceControler)
+router.get('/', authMiddleware, getAllInvoiceController)
+router.get('/:id', authMiddleware, getDetailInvoiceControler)
 router.post('/', authMiddleware, createInvoiceController)
 router.get('/order/:orderId', authMiddleware, getInvoiceByOrderId)
 router.get('/:tableId', authMiddleware, getPaidInvoiceByTableAndUserController)

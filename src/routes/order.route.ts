@@ -54,9 +54,6 @@ const router = express.Router()
  *               table_id:
  *                 type: string
  *                 example: "6521e5c4b3c7e4a2b9f7a101"
- *               user_id:
- *                 type: string
- *                 example: "6521e5c4b3c7e4a2b9f7a201"
  *               status:
  *                 type: string
  *                 example: "PENDING"

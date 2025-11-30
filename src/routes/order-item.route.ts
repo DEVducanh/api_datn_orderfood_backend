@@ -81,6 +81,9 @@ const router = express.Router()
  *     summary: Lấy danh sách món ăn theo table_id
  *     description: |
  *       API linh hoạt cho phép lấy danh sách món ăn đã gọi:
+ *       - Nếu **khách tại bàn**, truyền `table_id`.
+ *       Ví dụ:
+ *       - `/order-item/table?table_id=671fc9c2d9993b183f37b6f9`
  *     tags: [Order Items]
  *     parameters:
  *       - in: query
