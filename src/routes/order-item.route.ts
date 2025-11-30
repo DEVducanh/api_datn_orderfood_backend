@@ -5,6 +5,7 @@ import {
   getHistoryOrderItemController,
   getOrderItemControler,
   getOrderItemsByUserOrTableController,
+  updateManyOrderItemsController,
   updateSttOderItemControler
 } from '~/controllers/order-item.controler'
 import { authMiddleware, roleMiddleware } from '~/middlewares/auth'
@@ -355,11 +356,81 @@ const router = express.Router()
  *         description: Không tìm thấy Món ăn
  *       500:
  *         description: Lỗi server
+ *
+ * /order-item/orderitem-many:
+ *   patch:
+ *     summary: Cập nhật trạng thái nhiều order item trong một đơn hàng
+ *     description: |
+ *       API cho phép cập nhật trạng thái của nhiều order item cùng lúc.
+ *       Hệ thống sẽ kiểm tra phân quyền dựa trên role và luật chuyển trạng thái.
+ *     tags: [Order Items]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - orderId
+ *               - orderItemIds
+ *               - newStatus
+ *             properties:
+ *               orderId:
+ *                 type: string
+ *                 description: ID của đơn hàng chứa các order item cần cập nhật
+ *                 example: "68fef987e37e3fde60fce2e4"
+ *               orderItemIds:
+ *                 type: array
+ *                 description: Danh sách ID của order item cần cập nhật
+ *                 items:
+ *                   type: string
+ *                 example: ["item123", "item456", "item789"]
+ *               newStatus:
+ *                 type: string
+ *                 description: Trạng thái mới
+ *                 enum:
+ *                   - Pending
+ *                   - Processing
+ *                   - Ready
+ *                   - Served
+ *                   - Cancelled
+ *                 example: "Processing"
+ *     responses:
+ *       200:
+ *         description: Cập nhật thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 updatedCount:
+ *                   type: number
+ *                   example: 3
+ *                 message:
+ *                   type: string
+ *                   example: "Updated 3 order items successfully"
+ *       400:
+ *         description: Dữ liệu đầu vào sai hoặc không hợp lệ
+ *       401:
+ *         description: Không có token hoặc token không hợp lệ
+ *       403:
+ *         description: Không có quyền cập nhật trạng thái
+ *       404:
+ *         description: Không tìm thấy item
+ *       500:
+ *         description: Lỗi server
  */
+
 router.get('/order/:orderId', authMiddleware, getOrderItemControler)
 router.get('/table', authMiddleware, getOrderItemsByUserOrTableController)
 router.patch('/:id/cancel', authMiddleware, cancelOrderItemController)
 router.get('/:id/history', authMiddleware, getHistoryOrderItemController)
+router.patch('/orderitem-many', authMiddleware, updateManyOrderItemsController)
 router.patch(
   '/:id/status',
   authMiddleware,

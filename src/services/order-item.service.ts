@@ -102,6 +102,112 @@ export const updateSttOrderItemService = async (
   }
 }
 
+export const updateManyOrderItemsService = async (
+  orderId: string,
+  itemIds: string[],
+  newStatus: ORDER_ITEM_STATUS,
+  user: { id: Types.ObjectId | string; role: USER_ROLE }
+) => {
+  try {
+    if (!orderId) throw new Error('Thiếu order id')
+    if (!itemIds || itemIds.length === 0) throw new Error('Danh sách item rỗng')
+    if (!newStatus) throw new Error('Thiếu trạng thái mới')
+
+    const userId = user.id
+    const userRole = user.role
+
+    // Lấy tất cả orderItem thuộc order
+    const orderItems = await OrderItem.find({
+      _id: { $in: itemIds },
+      order_id: orderId
+    })
+
+    if (!orderItems || orderItems.length === 0) {
+      return {
+        success: false,
+        message: 'Không tìm thấy item hợp lệ trong order'
+      }
+    }
+
+    const results: any[] = []
+
+    // Duyệt từng item để xử lý
+    for (const item of orderItems) {
+      const currentStatus = item.status
+
+      if (currentStatus === ORDER_ITEM_STATUS.CANCELED || currentStatus === ORDER_ITEM_STATUS.SERVED) {
+        results.push({
+          id: item._id,
+          success: false,
+          message: `Item đã ${currentStatus === ORDER_ITEM_STATUS.CANCELED ? 'Hủy' : 'Phục vụ'}`
+        })
+        continue
+      }
+
+      // Kiểm tra quyền chuyển trạng thái
+      const allowedRoles = STATUS_TRANSITION_PERMISSIONS[currentStatus]?.[newStatus]
+
+      if (!allowedRoles || !allowedRoles.includes(userRole)) {
+        results.push({
+          id: item._id,
+          success: false,
+          message: `Không có quyền chuyển ${currentStatus} → ${newStatus}`
+        })
+        continue
+      }
+
+      // Lưu lịch sử trước
+      await new OrderItemStatusHistory({
+        orderitem_id: item._id,
+        old_status: currentStatus,
+        new_status: newStatus,
+        changed_by: userId
+      }).save()
+
+      // Update item
+      item.status = newStatus
+      await item.save()
+
+      results.push({
+        id: item._id,
+        success: true,
+        message: 'Cập nhật thành công'
+      })
+    }
+
+    // --- Update order status nếu cần ---
+    const totalItems = await OrderItem.countDocuments({ order_id: orderId })
+    const servedCount = await OrderItem.countDocuments({
+      order_id: orderId,
+      status: ORDER_ITEM_STATUS.SERVED
+    })
+    const canceledCount = await OrderItem.countDocuments({
+      order_id: orderId,
+      status: ORDER_ITEM_STATUS.CANCELED
+    })
+
+    let updatedOrder = null
+
+    if (servedCount + canceledCount === totalItems) {
+      const newOrderStatus = canceledCount === totalItems ? ORDER_STATUS.CANCELED : ORDER_STATUS.COMPLETED
+
+      updatedOrder = await Order.findByIdAndUpdate(orderId, { status: newOrderStatus }, { new: true })
+    }
+
+    return {
+      success: true,
+      message: 'Đã xử lý cập nhật nhiều item',
+      results,
+      order_status: updatedOrder?.status
+    }
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || 'Lỗi cập nhật nhiều order item'
+    }
+  }
+}
+
 export const getOrderItemService = async (order_id: string) => {
   try {
     const data = await OrderItem.find({ order_id }).populate('dish_id', 'dish_name imageUrl price')
