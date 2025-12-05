@@ -54,9 +54,13 @@ export const updateTableStatusController = async (req: Request, res: Response) =
 export const deleteTableController = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
+    console.log(id)
     const data = await deleteTableService(id)
+
     return res.status(200).json({ success: DEFAULT_MESSAGE.DEFAULT_SUCCESS, data })
   } catch (error) {
+    console.log(error)
+
     return res.status(400).json({ message: DEFAULT_MESSAGE.DEFAULT_ERROR })
   }
 }

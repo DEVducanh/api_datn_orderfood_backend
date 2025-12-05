@@ -65,16 +65,23 @@ export const updateStatusTableService = async (id: string, status: TABLE_STATUS)
 
     return table
   } catch (error) {
-    console.log(error)
-
     throw new Error('cannot update Status Table')
   }
 }
 
 export const deleteTableService = async (id: string) => {
   try {
+    const table = await Table.findById(id)
+    if (!table) {
+      throw new Error('Không tìm thấy bàn!')
+    }
+
+    if (table.status === TABLE_STATUS.OCCUPIED) {
+      throw new Error('Bàn đang có người ngồi không thể xóa!')
+    }
     await Table.findByIdAndDelete(id)
+    return { mesage: 'Table Delete Success' }
   } catch (error) {
-    throw new Error('cannot delete Table')
+    throw new Error('Error Delete table', { cause: error })
   }
 }

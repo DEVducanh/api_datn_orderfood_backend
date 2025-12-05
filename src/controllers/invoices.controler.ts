@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 
 import {
   createInvoiceService,
+  generateInvoicePDF,
   getAllInvoiceService,
   getDetailInvoicesService,
   getInvoiceByOrderIdService,
@@ -102,6 +103,25 @@ export const getPaidInvoiceByTableAndUserController = async (req: Request, res: 
       success: false,
       message: 'Lỗi server',
       error: error.message
+    })
+  }
+}
+
+export const exportPdfControler = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+
+    const result = await generateInvoicePDF(id)
+
+    return res.json({
+      success: true,
+      message: 'PDF generated successfully',
+      pdfUrl: result.pdfUrl
+    })
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
     })
   }
 }
