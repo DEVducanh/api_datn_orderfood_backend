@@ -1,6 +1,7 @@
 import express from 'express'
 import {
   createInvoiceController,
+  exportPdfControler,
   getAllInvoiceController,
   getDetailInvoiceControler,
   getInvoiceByOrderId,
@@ -379,8 +380,64 @@ const router = express.Router()
  *         description: Lỗi server
  */
 
+/**
+ * @swagger
+ * /invoice/{id}/pdf:
+ *   get:
+ *     summary: Generate and return PDF URL of an invoice
+ *     tags: [Invoices]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the invoice
+ *     responses:
+ *       200:
+ *         description: PDF generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 pdfUrl:
+ *                   type: string
+ *                   example: "https://res.cloudinary.com/dddsqdalk/image/upload/v1764934382/invoices/invoice123.pdf"
+ *       404:
+ *         description: Invoice not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invoice not found"
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error"
+ */
+
 router.get('/', authMiddleware, getAllInvoiceController)
 router.get('/:id', authMiddleware, getDetailInvoiceControler)
+router.get('/:id/pdf', exportPdfControler)
 router.post('/', authMiddleware, createInvoiceController)
 router.get('/order/:orderId', authMiddleware, getInvoiceByOrderId)
 router.get('/:tableId', authMiddleware, getPaidInvoiceByTableAndUserController)

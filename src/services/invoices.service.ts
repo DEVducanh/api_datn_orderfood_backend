@@ -7,6 +7,11 @@ import OrderItem from '../models/order-item.model'
 import Payments from '../models/payment.model'
 import Transactions from '../models/transaction.model'
 import mongoose from 'mongoose'
+import { invoiceTemplate } from '~/constants/templatePdf'
+import puppeteer from 'puppeteer'
+import path from 'path'
+import fs from 'fs'
+import cloudinary from '../utils/upload'
 
 export const getAllInvoiceService = async () => {
   try {
@@ -335,5 +340,58 @@ export const getPaidInvoiceByTableAndUserService = async (tableId: string, userI
     return { invoice, orderItems }
   } catch (error) {
     throw error
+  }
+}
+
+export const generateInvoicePDF = async (invoiceId: string) => {
+  const invoice = await Invoices.findById(invoiceId)
+  if (!invoice) throw new Error('Invoice not found')
+
+  const order = await Order.findById(invoice.order_id).populate('table_id', 'table_name')
+  if (!order) throw new Error('Order not found')
+
+  const items = await OrderItem.find({ order_id: order._id }).populate('dish_id', 'dish_name')
+
+  const invoiceData = {
+    invoice_id: invoice._id,
+    table_name: (order.table_id as any)?.table_name || 'Không xác định',
+    createdAt: order.createdAt?.toLocaleString(),
+    total: order.total_price,
+    items: items.map((i: any) => ({
+      name: i.dish_id?.dish_name,
+      quantity: i.quantity,
+      price: i.price
+    }))
+  }
+
+  const html = invoiceTemplate(invoiceData)
+
+  const invoicesDir = path.join(process.cwd(), 'invoices')
+  if (!fs.existsSync(invoicesDir)) {
+    fs.mkdirSync(invoicesDir, { recursive: true })
+  }
+
+  const pdfPath = path.join(invoicesDir, `invoice-${invoiceId}.pdf`)
+  const browser = await puppeteer.launch({ headless: true })
+  const page = await browser.newPage()
+
+  await page.setContent(html, { waitUntil: 'networkidle0' })
+
+  await page.pdf({
+    path: pdfPath,
+    format: 'A4',
+    printBackground: true
+  })
+
+  await browser.close()
+
+  const result = await cloudinary.uploader.upload(pdfPath, {
+    resource_type: 'auto',
+    folder: 'invoices'
+  })
+
+  fs.unlinkSync(pdfPath)
+  return {
+    pdfUrl: result.secure_url
   }
 }
