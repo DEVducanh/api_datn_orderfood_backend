@@ -293,11 +293,22 @@ export const getHistoryOrderItem = async (id: string) => {
 
 export const cancelOrderItemService = async (id: string) => {
   const orderItem = await OrderItem.findById(id)
+  const order = await Order.findById(orderItem?.order_id)
+  if (!order) throw new Error('Order không tồn tại')
   if (!orderItem) throw new Error('Order Item Không tìm thấy')
   if (orderItem.status !== ORDER_ITEM_STATUS.PENDING) throw new Error('Đầu bếp đã làm không thể hủy')
 
   orderItem.status = ORDER_ITEM_STATUS.CANCELED
-  const newOrderItem = await orderItem.save()
+  await orderItem.save()
 
-  return newOrderItem
+  const moneyToSubtract = orderItem.price * orderItem.quantity
+  order.total_price = Math.max(0, order.total_price - moneyToSubtract)
+
+  await order.save()
+
+  return {
+    message: 'Hủy món thành công',
+    orderItem,
+    updatedOrder: order
+  }
 }
