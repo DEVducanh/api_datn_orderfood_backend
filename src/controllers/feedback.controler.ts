@@ -26,8 +26,10 @@ export const getAllFeedBackControler = async (req: Request, res: Response) => {
 
 export const createFeedBackControler = async (req: Request, res: Response) => {
   try {
-    const user_id = (req as any).user.id
+    const user_id = req.user?.id
     const { order_id, dish_id, type, rating, content, image } = req.body
+
+    if (!user_id) return
 
     const newFeedBack = await createFeedBackService(user_id, order_id, dish_id, type, rating, content, image)
 
