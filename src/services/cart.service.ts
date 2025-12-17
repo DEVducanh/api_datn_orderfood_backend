@@ -128,8 +128,10 @@ export const checkoutCartService = async (user_id: string, table_id: string) => 
     let order = await Order.findOne({
       user_id,
       table_id,
-      status: ORDER_STATUS.PENDING
+      status: ORDER_STATUS.PENDING || ORDER_STATUS.PROCESSING || ORDER_STATUS.COMPLETED || ORDER_STATUS.SHIPPED
     })
+
+    console.log(order)
 
     if (!order) {
       order = await Order.create({
